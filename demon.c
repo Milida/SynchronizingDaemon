@@ -9,15 +9,12 @@
 #include <string.h>
 #include <dirent.h>
 
-int isDirectoryExists(const char *path) //codeforwin.org
-{
+int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
     stat(path, &stats);
 
     // Check for file existence
-    if (S_ISDIR(stats.st_mode))
-        return 1;
-    return 0;
+    return S_ISDIR(stats.st_mode)
 }
 
 int main(int argc, char *argv[]) {
@@ -37,17 +34,19 @@ int main(int argc, char *argv[]) {
 
     if (isDirectoryExists(source)){
         printf("Directory exists at path '%s'\n", source);
-        if(isDirectoryExists(destination))
+        if(isDirectoryExists(destination)) {
             printf("Directory exists at path '%s'\n", destination);
+        }
         else{
             printf("Directory does not exist at path '%s'\n", destination);
             return EXIT_FAILURE;
         }
     }
-    else
+    else {
         printf("Directory does not exist at path '%s'\n", source);
+    }
 
-    DIR *dp;
+    DIR *dp; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
 
     dp = opendir (source);
