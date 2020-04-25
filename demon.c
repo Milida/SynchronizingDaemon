@@ -11,13 +11,11 @@
 int isDirectoryExists(const char *path) //codeforwin.org
 {
     struct stat stats;
-
     stat(path, &stats);
 
     // Check for file existence
     if (S_ISDIR(stats.st_mode))
         return 1;
-
     return 0;
 }
 
@@ -26,7 +24,7 @@ int main(int argc, char *argv[]) {
         printf("Too few arguments\n");
         return EXIT_FAILURE;
     }
-    if(argv >2){
+    if(argv >3){
         printf("To many arguments\n");
         return EXIT_FAILURE;
     }
@@ -37,18 +35,15 @@ int main(int argc, char *argv[]) {
     char *destination = argv[2];
     if (isDirectoryExists(source)){
         printf("Directory exists at path '%s'\n", source);
-        if(isDirectoryExists(destination)){
+        if(isDirectoryExists(destination))
             prints("Directory exists at path '%s'\n", destination)
-        }
         else{
-            printf("Directory does not exists at path '%s'\n", destination);
+            printf("Directory does not exist at path '%s'\n", destination);
             return EXIT_FAILURE;
         }
     }
     else
-    {
-        printf("Directory does not exists at path '%s'\n", source);
-    }
+        printf("Directory does not exist at path '%s'\n", source);
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
