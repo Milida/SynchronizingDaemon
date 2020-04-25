@@ -14,7 +14,14 @@ int isDirectoryExists(const char *path){ //codeforwin.org
     stat(path, &stats);
 
     // Check for file existence
-    return S_ISDIR(stats.st_mode)
+    return S_ISDIR(stats.st_mode);
+}
+
+int isFileExists(const char *path){
+    struct stat stats;
+    stat(path, &stats);
+
+    return S_ISREG(stats.st_mode);
 }
 
 int main(int argc, char *argv[]) {
@@ -53,7 +60,10 @@ int main(int argc, char *argv[]) {
     if (dp != NULL)
     {
         while (ep = readdir (dp))
-            puts (ep->d_name);
+            printf(ep->d_name);
+            if(isFileExists(source + '/' + ep->d_name)){
+                puts(" True");
+            }
         (void) closedir (dp);
     }
     else
