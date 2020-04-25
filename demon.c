@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
         printf("Directory does not exist at path '%s'\n", source);
     }
 
-    DIR *dp;
+    DIR *dp; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
 
     dp = opendir (source);
