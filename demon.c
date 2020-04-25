@@ -8,7 +8,14 @@
 #include <syslog.h>
 #include <string.h>
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    if(argv <= 2){
+        printf("Too few arguments\n");
+        return EXIT_FAILURE;
+    }
+
+    printf("Źródło: %s\n", argv[1]);
+    printf("Docfelowo: %s\n", argv[2]);
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
