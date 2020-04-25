@@ -10,6 +10,42 @@
 #include <dirent.h>
 #include <string.h>
 
+typedef struct ListSourceFiles{
+    char *file;
+    struct ListSourceFiles * next;
+} ListSourceFiles_type;
+
+void addSourceFile(ListSourceFiles_type **head, char *newFile){
+    if(*head!=NULL){
+        ListSourceFiles_type *current=*head;
+        while (current->next != NULL){
+            current = current->next;
+        }
+        current->next = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
+        current->next->file = newFile;
+        current->next->next = NULL;
+    }
+    else{
+        *head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
+        (*head)->file = newFile;
+        (*head)->next = NULL;
+    }
+}
+void show(ListSourceFiles_type *head)
+{
+    printf("\n");
+    if(head==NULL) printf("List is empty");
+    else{
+        ListSourceFiles_type *current=head;
+        do {
+            printf("%s", current->file);
+            printf("\n");
+            current = current->next;
+        }while (current != NULL);
+
+    }
+}
+
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
     stat(path, &stats);
@@ -23,7 +59,11 @@ int isFileExists(const char *path){
     return S_ISREG(stats.st_mode);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
+    ListSourceFiles_type *head;
+    head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
+    head=NULL;
+
     if(argc <= 2){
         printf("Too few arguments\n");
         return EXIT_FAILURE;
@@ -65,6 +105,7 @@ int main(int argc, char *argv[]) {
             printf("%s%s\n",name,ep->d_name);
             if(isFileExists(strcat(name,ep->d_name))){
                 puts("True");
+                addSourceFile(&head, ep->d_name);
             }
         }
         (void) closedir (dp);
@@ -72,6 +113,7 @@ int main(int argc, char *argv[]) {
     else{
         perror ("Couldn't open the directory");
     }
+    show(head);
     /* Our process ID and Session ID */
     pid_t pid, sid;
     /* Fork off the parent process */
