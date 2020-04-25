@@ -8,6 +8,19 @@
 #include <syslog.h>
 #include <string.h>
 
+int isDirectoryExists(const char *path) //codeforwin.org
+{
+    struct stat stats;
+
+    stat(path, &stats);
+
+    // Check for file existence
+    if (S_ISDIR(stats.st_mode))
+        return 1;
+
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     if(argv <= 2){
         printf("Too few arguments\n");
@@ -18,6 +31,22 @@ int main(int argc, char *argv[]) {
     printf("Docelowo: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
+    if (isDirectoryExists(source))
+    {
+        printf("Directory exists at path '%s'\n", path);
+    }
+    else
+    {
+        printf("Directory does not exists at path '%s'\n", path);
+    }
+    if (isDirectoryExists(destination))
+    {
+        printf("Directory exists at path '%s'\n", path);
+    }
+    else
+    {
+        printf("Directory does not exists at path '%s'\n", path);
+    }
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
