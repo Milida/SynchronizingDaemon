@@ -26,9 +26,13 @@ int main(int argc, char *argv[]) {
         printf("Too few arguments\n");
         return EXIT_FAILURE;
     }
+    if(argv >2){
+        printf("To many arguments\n");
+        return EXIT_FAILURE;
+    }
 
-    printf("Źródło: %s\n", argv[1]);
-    printf("Docelowo: %s\n", argv[2]);
+    printf("Source: %s\n", argv[1]);
+    printf("Destination: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
     if (isDirectoryExists(source)){
@@ -91,7 +95,7 @@ int main(int argc, char *argv[]) {
     while (1) {
         /* Do some task here ... */
 
-        sleep(30); /* wait 30 seconds */
+        sleep(); /* wait 30 seconds */
     }
     exit(EXIT_SUCCESS);
 }
