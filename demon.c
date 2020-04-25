@@ -8,8 +8,13 @@
 #include <syslog.h>
 #include <string.h>
 
-int main(void) {
+void check(char* source, char* destination){
+    printf("Źródło: %s\n", source);
+    printf("Docelowo: %s\n", destination);
+}
 
+int main(char* source, char* destination) {
+    check(source, destination);
     /* Our process ID and Session ID */
     pid_t pid, sid;
 
