@@ -8,15 +8,12 @@
 #include <syslog.h>
 #include <string.h>
 
-int isDirectoryExists(const char *path) //codeforwin.org
-{
+int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
     stat(path, &stats);
 
     // Check for file existence
-    if (S_ISDIR(stats.st_mode))
-        return 1;
-    return 0;
+    return S_ISDIR(stats.st_mode)
 }
 
 int main(int argc, char *argv[]) {
@@ -35,15 +32,17 @@ int main(int argc, char *argv[]) {
     char *destination = argv[2];
     if (isDirectoryExists(source)){
         printf("Directory exists at path '%s'\n", source);
-        if(isDirectoryExists(destination))
+        if(isDirectoryExists(destination)) {
             printf("Directory exists at path '%s'\n", destination);
+        }
         else{
             printf("Directory does not exist at path '%s'\n", destination);
             return EXIT_FAILURE;
         }
     }
-    else
+    else {
         printf("Directory does not exist at path '%s'\n", source);
+    }
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
