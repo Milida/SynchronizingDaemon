@@ -31,21 +31,19 @@ int main(int argc, char *argv[]) {
     printf("Docelowo: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
-    if (isDirectoryExists(source))
-    {
-        printf("Directory exists at path '%s'\n", path);
+    if (isDirectoryExists(source)){
+        printf("Directory exists at path '%s'\n", source);
+        if(isDirectoryExists(destination)){
+            prints("Directory exists at path '%s'\n", destination)
+        }
+        else{
+            printf("Directory does not exists at path '%s'\n", destination);
+            return EXIT_FAILURE;
+        }
     }
     else
     {
-        printf("Directory does not exists at path '%s'\n", path);
-    }
-    if (isDirectoryExists(destination))
-    {
-        printf("Directory exists at path '%s'\n", path);
-    }
-    else
-    {
-        printf("Directory does not exists at path '%s'\n", path);
+        printf("Directory does not exists at path '%s'\n", source);
     }
 
     /* Our process ID and Session ID */
