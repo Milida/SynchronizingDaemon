@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     if (isDirectoryExists(source)){
         printf("Directory exists at path '%s'\n", source);
         if(isDirectoryExists(destination))
-            prints("Directory exists at path '%s'\n", destination)
+            printf("Directory exists at path '%s'\n", destination);
         else{
             printf("Directory does not exist at path '%s'\n", destination);
             return EXIT_FAILURE;
@@ -87,10 +87,10 @@ int main(int argc, char *argv[]) {
     /* Daemon-specific initialization goes here */
 
     /* The Big Loop */
-    while (1) {
+    //while (1) {
         /* Do some task here ... */
 
-        sleep(); /* wait 30 seconds */
-    }
+        //sleep(); /* wait 30 seconds */
+    //}
     exit(EXIT_SUCCESS);
 }
