@@ -1,47 +1,70 @@
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <unistd.h>
+#include <syslog.h>
+#include <string.h>
 
-/* Spawn a child process running a new program. PROGRAM is the name
-   of the program to run; the path will be searched for this program.
-   ARG_LIST is a NULL-terminated list of character strings to be
-   passed as the program's argument list. Returns  the process ID of
-   the spawned process. */
+int main(int argc, char *argv[]) {
+    if(argv <= 2){
+        printf("Too few arguments\n");
+        return EXIT_FAILURE;
+    }
 
-int spawn (char program, char** arg_list)
-{
-  pid_t child_pid;
+    printf("Źródło: %s\n", argv[1]);
+    printf("Docelowo: %s\n", argv[2]);
+    char *source = argv[1];
+    char *destination = argv[2];
 
-  /* Duplicate this process. */
-  child_pid = fork ();
-  if (child_pid != 0)
-    /* This is the parent process. */
-    return child_pid;
-  else {
-    /* Now execute PROGRAM, searching for it in the path.  */
-    execvp (program,  arg_list);
-    /* The execvp  function returns only if an error occurs.  */
-    fprintf (stderr,  "an error occurred in execvp\n");
-    abort ();
-  }
-}
+    /* Our process ID and Session ID */
+    pid_t pid, sid;
 
-int main ()
-{
-  /*  The argument list to pass to the "ls" command.  */
-  char arg_list[] = {
-    "ls",     /* argv[0], the name of the program.  */
-    "-l",
-    "/",
-    NULL      /* The argument list must end with a NULL.  */
-  };
+    /* Fork off the parent process */
+    pid = fork();
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+    /* If we got a good PID, then
+       we can exit the parent process. */
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
+    }
 
-  /* Spawn a child process running the "ls" command. Ignore the
-     returned child process ID.  */
-spawn ("ls", arg_list);
+    /* Change the file mode mask */
+    umask(0);
 
-printf ("done with main program\n");
+    /* Open any logs here */
 
-return 0;
+    /* Create a new SID for the child process */
+    sid = setsid();
+    if (sid < 0) {
+        /* Log the failure */
+        exit(EXIT_FAILURE);
+    }
+
+
+
+    /* Change the current working directory */
+    if ((chdir("/")) < 0) {
+        /* Log the failure */
+        exit(EXIT_FAILURE);
+    }
+
+    /* Close out the standard file descriptors */
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    /* Daemon-specific initialization goes here */
+
+    /* The Big Loop */
+    while (1) {
+        /* Do some task here ... */
+
+        sleep(30); /* wait 30 seconds */
+    }
+    exit(EXIT_SUCCESS);
 }
