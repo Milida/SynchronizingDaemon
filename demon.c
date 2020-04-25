@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <string.h>
+#include <dirent.h>
 
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
@@ -30,6 +31,7 @@ int main(int argc, char *argv[]) {
     printf("Destination: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
+
     if (isDirectoryExists(source)){
         printf("Directory exists at path '%s'\n", source);
         if(isDirectoryExists(destination)) {
@@ -43,6 +45,20 @@ int main(int argc, char *argv[]) {
     else {
         printf("Directory does not exist at path '%s'\n", source);
     }
+
+    DIR *dp;
+    struct dirent *ep;
+
+    dp = opendir (source);
+    if (dp != NULL)
+    {
+        while (ep = readdir (dp))
+            puts (ep->d_name);
+        (void) closedir (dp);
+    }
+    else
+        perror ("Couldn't open the directory");
+
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
