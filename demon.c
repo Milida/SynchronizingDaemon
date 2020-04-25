@@ -15,7 +15,9 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Źródło: %s\n", argv[1]);
-    printf("Docfelowo: %s\n", argv[2]);
+    printf("Docelowo: %s\n", argv[2]);
+    char *source = argv[1];
+    char *destination = argv[2];
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
