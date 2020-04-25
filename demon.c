@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         printf("Too few arguments\n");
         return EXIT_FAILURE;
     }
-    if(argv >3){
+    if(argv > 3){
         printf("To many arguments\n");
         return EXIT_FAILURE;
     }
