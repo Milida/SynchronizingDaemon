@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/sendfile.h>
 #include <fcntl.h>
+#include <filecheck.h>
 
 
 /*
@@ -54,6 +55,7 @@ int copy_file(const char *source, const char *dest){
     }
     return 0; /* Failure */
 }
+
 typedef struct ListSourceFiles{
     char *file;
     struct ListSourceFiles * next;
@@ -88,19 +90,6 @@ void show(ListSourceFiles_type *head)
         }while (current != NULL);
 
     }
-}
-
-int isDirectoryExists(const char *path){ //codeforwin.org
-    struct stat stats;
-    stat(path, &stats);
-    // Check for file existence
-    return (S_ISDIR(stats.st_mode));
-}
-
-int isFileExists(const char *path){
-    struct stat stats;
-    stat(path, &stats);
-    return S_ISREG(stats.st_mode);
 }
 
 int main(int argc, char *argv[]){
