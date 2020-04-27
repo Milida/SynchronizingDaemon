@@ -3,9 +3,10 @@
 
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
-    stat(path, &stats);
-
-    return (S_ISDIR(stats.st_mode));
+    if(stat(path, &stats) != -1){
+        return (IS_ISDIR(stats.st_mode))
+    }
+    return 0;
 }
 
 int isFileExists(const char *path){

@@ -109,18 +109,11 @@ int main(int argc, char *argv[]){
     printf("Destination: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
-    if (isDirectoryExists(source)){
-        printf("Directory exists at path '%s'\n", source);
-        if(isDirectoryExists(destination)) {
-            printf("Directory exists at path '%s'\n", destination);
-        }
-        else{
-            printf("Directory does not exist at path '%s'\n", destination);
-            return EXIT_FAILURE;
-        }
+    if (!isDirectoryExists(source)){
+        return EXIT_FAILURE;
     }
-    else {
-        printf("Directory does not exist at path '%s'\n", source);
+    if(!isDirectoryExists(destination)) {
+        return EXIT_FAILURE;
     }
     DIR *dp; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
