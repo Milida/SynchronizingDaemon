@@ -18,43 +18,40 @@
 ** http://www.unixguide.net/unix/programming/2.5.shtml
 ** About locking mechanism...
 */
+void copyFile(char *sourceFile, char *destinationFile) {
+    char bufor[4096];
+    int readSource, writeDes;
+    int source = open(sourceFile, O_RDONLY);
+    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
-int copy_file(const char *source, const char *dest){
-    int fdSource = open(source, O_RDWR);
-
-    /* Caf's comment about race condition... */
-    if (fdSource > 0){
-        if (lockf(fdSource, F_LOCK, 0) == -1) return 0; /* FAILURE */
-    }else return 0; /* FAILURE */
-
-    /* Now the fdSource is locked */
-
-    int fdDest = open(dest, O_CREAT);
-    off_t lCount;
-    struct stat sourceStat;
-    if (fdSource > 0 && fdDest > 0){
-        if (!stat(source, &sourceStat)){
-            int len = sendfile(fdDest, fdSource, &lCount, sourceStat.st_size);
-            if (len > 0 && len == sourceStat.st_size){
-                close(fdDest);
-                close(fdSource);
-
-                /* Sanity Check for Lock, if this is locked -1 is returned! */
-                if (lockf(fdSource, F_TEST, 0) == 0){
-                    if (lockf(fdSource, F_ULOCK, 0) == -1){
-                        /* WHOOPS! WTF! FAILURE TO UNLOCK! */
-                    }else{
-                        return 1; /* Success */
-                    }
-                }else{
-                    /* WHOOPS! WTF! TEST LOCK IS -1 WTF! */
-                    return 0; /* FAILURE */
-                }
-            }
-        }
+    if (source < 0 || destination < 0){
+        printf("Couldn't open the file");
+        exit(EXIT_FAILURE);
     }
-    return 0; /* Failure */
+    while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
+        writeDes = write(destination, bufor, (ssize_t) readSource);
+    }
+    close(source);
+    close(destination);
 }
+
+void copy_File(char *sourceFile, char *destinationFile) {
+    struct stat stbuf;
+    int readSource, writeDes;
+    int source = open(sourceFile, O_RDONLY);
+    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+
+    if (source < 0 || destination < 0){
+        printf("Couldn't open the file");
+        exit(EXIT_FAILURE);
+    }
+    fstat(source, &stbuf);
+    sendfile(destination, source, 0, stbuf.st_size);
+
+    close(source);
+    close(destination);
+}
+
 
 typedef struct ListSourceFiles{
     char *file;
@@ -137,7 +134,7 @@ int main(int argc, char *argv[]){
 
                 strcpy(des,destination);
                 strcat(des,"/");
-                copy_file(name,strcat(des, ep->d_name));
+                copyFme,strcat(des, ep->d_name));
 
             }
         }
