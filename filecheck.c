@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <errno.h>
+#include "filecheck.h"
 
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;

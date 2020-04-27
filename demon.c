@@ -11,14 +11,14 @@
 #include <string.h>
 #include <sys/sendfile.h>
 #include <fcntl.h>
-#include <filecheck.h>
-
+#include "filecheck.h"
+#include "filelist.h"
 
 /*
 ** http://www.unixguide.net/unix/programming/2.5.shtml
 ** About locking mechanism...
 */
-void copyFile(char *sourceFile, char *destinationFile) {
+/*void copy_File(char *sourceFile, char *destinationFile) {
     char bufor[4096];
     int readSource, writeDes;
     int source = open(sourceFile, O_RDONLY);
@@ -33,9 +33,9 @@ void copyFile(char *sourceFile, char *destinationFile) {
     }
     close(source);
     close(destination);
-}
+}*/
 
-void copy_File(char *sourceFile, char *destinationFile) {
+void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
     int readSource, writeDes;
     int source = open(sourceFile, O_RDONLY);
@@ -50,43 +50,6 @@ void copy_File(char *sourceFile, char *destinationFile) {
 
     close(source);
     close(destination);
-}
-
-
-typedef struct ListSourceFiles{
-    char *file;
-    struct ListSourceFiles * next;
-} ListSourceFiles_type;
-
-void addSourceFile(ListSourceFiles_type **head, char *newFile){
-    if(*head!=NULL){
-        ListSourceFiles_type *current=*head;
-        while (current->next != NULL){
-            current = current->next;
-        }
-        current->next = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
-        current->next->file = newFile;
-        current->next->next = NULL;
-    }
-    else{
-        *head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
-        (*head)->file = newFile;
-        (*head)->next = NULL;
-    }
-}
-void show(ListSourceFiles_type *head)
-{
-    printf("\n");
-    if(head==NULL) printf("List is empty");
-    else{
-        ListSourceFiles_type *current=head;
-        do {
-            printf("%s", current->file);
-            printf("\n");
-            current = current->next;
-        }while (current != NULL);
-
-    }
 }
 
 int main(int argc, char *argv[]){
@@ -134,7 +97,7 @@ int main(int argc, char *argv[]){
 
                 strcpy(des,destination);
                 strcat(des,"/");
-                copyFme,strcat(des, ep->d_name));
+                copyFile(strcat(des, ep->d_name));
 
             }
         }
