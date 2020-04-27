@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/sendfile.h>
 #include <fcntl.h>
+#include <filecheck.h>
 
 
 /*
@@ -54,6 +55,7 @@ int copy_file(const char *source, const char *dest){
     }
     return 0; /* Failure */
 }
+
 typedef struct ListSourceFiles{
     char *file;
     struct ListSourceFiles * next;
@@ -90,19 +92,6 @@ void show(ListSourceFiles_type *head)
     }
 }
 
-int isDirectoryExists(const char *path){ //codeforwin.org
-    struct stat stats;
-    stat(path, &stats);
-    // Check for file existence
-    return (S_ISDIR(stats.st_mode));
-}
-
-int isFileExists(const char *path){
-    struct stat stats;
-    stat(path, &stats);
-    return S_ISREG(stats.st_mode);
-}
-
 int main(int argc, char *argv[]){
     ListSourceFiles_type *head;
     head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
@@ -120,18 +109,11 @@ int main(int argc, char *argv[]){
     printf("Destination: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
-    if (isDirectoryExists(source)){
-        printf("Directory exists at path '%s'\n", source);
-        if(isDirectoryExists(destination)) {
-            printf("Directory exists at path '%s'\n", destination);
-        }
-        else{
-            printf("Directory does not exist at path '%s'\n", destination);
-            return EXIT_FAILURE;
-        }
+    if (!isDirectoryExists(source)){
+        return EXIT_FAILURE;
     }
-    else {
-        printf("Directory does not exist at path '%s'\n", source);
+    if(!isDirectoryExists(destination)) {
+        return EXIT_FAILURE;
     }
     DIR *dp; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
