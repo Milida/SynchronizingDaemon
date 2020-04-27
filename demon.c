@@ -9,7 +9,51 @@
 #include <string.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/sendfile.h>
+#include <fcntl.h>
 
+
+/*
+** http://www.unixguide.net/unix/programming/2.5.shtml
+** About locking mechanism...
+*/
+
+int copy_file(const char *source, const char *dest){
+    int fdSource = open(source, O_RDWR);
+
+    /* Caf's comment about race condition... */
+    if (fdSource > 0){
+        if (lockf(fdSource, F_LOCK, 0) == -1) return 0; /* FAILURE */
+    }else return 0; /* FAILURE */
+
+    /* Now the fdSource is locked */
+
+    int fdDest = open(dest, O_CREAT);
+    off_t lCount;
+    struct stat sourceStat;
+    if (fdSource > 0 && fdDest > 0){
+        if (!stat(source, &sourceStat)){
+            int len = sendfile(fdDest, fdSource, &lCount, sourceStat.st_size);
+            if (len > 0 && len == sourceStat.st_size){
+                close(fdDest);
+                close(fdSource);
+
+                /* Sanity Check for Lock, if this is locked -1 is returned! */
+                if (lockf(fdSource, F_TEST, 0) == 0){
+                    if (lockf(fdSource, F_ULOCK, 0) == -1){
+                        /* WHOOPS! WTF! FAILURE TO UNLOCK! */
+                    }else{
+                        return 1; /* Success */
+                    }
+                }else{
+                    /* WHOOPS! WTF! TEST LOCK IS -1 WTF! */
+                    return 0; /* FAILURE */
+                }
+            }
+        }
+    }
+    return 0; /* Failure */
+}
 typedef struct ListSourceFiles{
     char *file;
     struct ListSourceFiles * next;
@@ -94,6 +138,7 @@ int main(int argc, char *argv[]){
     dp = opendir (source);
     char *tmp;
     char *name;
+    char *des;
     //strcpy(name, source);
     //strcat(name,"/");
     //puts(name);
@@ -105,7 +150,13 @@ int main(int argc, char *argv[]){
             printf("%s%s\n",name,ep->d_name);
             if(isFileExists(strcat(name,ep->d_name))){
                 puts("True");
+                printf("%s\n"name);
                 addSourceFile(&head, ep->d_name);
+
+                strcpy(des,destination);
+                strcat(des,"/");
+                copy_file(name,strcat(des, ep->d_name));
+
             }
         }
         (void) closedir (dp);
