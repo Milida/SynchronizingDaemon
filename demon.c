@@ -140,8 +140,8 @@ int main(int argc, char *argv[]){
                 puts("True");
                 addSourceFile(&head, ep->d_name);
                 strcpy(des->name,destination);
-                //strcat(des->name,"/");
-                //copyFile(name->name,strcat(des->name, ep->d_name));
+                strcat(des->name,"/");
+                copyFile(name->name,strcat(des->name, ep->d_name));
             }
         }
         (void) closedir (sourceDir);
