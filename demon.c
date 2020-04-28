@@ -62,38 +62,6 @@ off_t read_size(char *source){
     else exit EXIT_FAILURE;
 }
 
-void readCopySourceDir(char *source, char *destination){
-    DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
-    struct dirent *ep;
-    sourceDir = opendir (source);
-    char *tmp;
-    char *name;
-    char *des;
-    //strcpy(name, source);
-    //strcat(name,"/");
-    //puts(name);
-    if (sourceDir != NULL){
-        while (ep = readdir (sourceDir)){
-            puts(ep->d_name);
-            strcpy(name, source);
-            strcat(name,"/");
-            printf("%s%s\n",name,ep->d_name);
-            if(isFileExists(strcat(name,ep->d_name))){
-                puts("True");
-                addSourceFile(&head, ep->d_name);
-                strcpy(des,destination);
-                strcat(des,"/");
-                copyFile(strcat(des, ep->d_name));
-            }
-        }
-        (void) closedir (sourceDir);
-    }
-    else{
-        perror ("Couldn't open the directory");
-    }
-    show(head);
-}
-
 void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
@@ -110,7 +78,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     close(destination);
 
     mode_t source_chmod = read_chmod(sourceFile);
-    if(!chmod(destinationFile, source_chmod)==0){
+    if(!chmod(destinationFile, &source_chmod)){
         printf("\nPoprawnie nadano uprawnienia\n");
     }
     else exit EXIT_FAILURE;
@@ -147,7 +115,35 @@ int main(int argc, char *argv[]){
     if(!isDirectoryExists(destination)) {
         return EXIT_FAILURE;
     }
-    readCopySourceDir(source, destination);
+    DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
+    struct dirent *ep;
+    sourceDir = opendir (source);
+    char *tmp;
+    char *name;
+    char *des;
+    //strcpy(name, source);
+    //strcat(name,"/");
+    //puts(name);
+    if (sourceDir != NULL){
+        while (ep = readdir (sourceDir)){
+            puts(ep->d_name);
+            strcpy(name, source);
+            strcat(name,"/");
+            printf("%s%s\n",name,ep->d_name);
+            if(isFileExists(strcat(name,ep->d_name))){
+                puts("True");
+                addSourceFile(&head, ep->d_name);
+                strcpy(des,destination);
+                strcat(des,"/");
+                copyFile(name,strcat(des, ep->d_name));
+            }
+        }
+        (void) closedir (sourceDir);
+    }
+    else{
+        perror ("Couldn't open the directory");
+    }
+    show(head);
     /* Our process ID and Session ID */
     pid_t pid, sid;
     /* Fork off the parent process */
