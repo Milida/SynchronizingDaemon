@@ -67,9 +67,10 @@ void copyFile(char *sourceFile, char *destinationFile) {
     int source = open(sourceFile, O_RDONLY);
     int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
-    if (source < 0 || destination < 0){
+    if (source < 0 || destination < 0) {
         printf("Couldn't open the file");
         exit(EXIT_FAILURE);
+    }
     fstat(source, &stbuf);
     sendfile(destination, source, 0, stbuf.st_size);
 
@@ -77,7 +78,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     close(destination);
 
     mode_t source_chmod = read_chmod(sourceFile);
-    if(!chmod(destinationFile, &source_chmod)){
+    if(!chmod(destinationFile, source_chmod)){
         printf("\nPoprawnie nadano uprawnienia\n");
     }
     else exit(EXIT_FAILURE);
@@ -85,7 +86,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     struct utimbuf source_time;
     source_time.modtime = read_time(sourceFile);
     source_time.actime = time(NULL);
-    if(!utime(destinationFile, source_time)){
+    if(!utime(destinationFile, &source_time)){
         printf("\nPoprawnie przeniesiono stempel czasowy\n");
     }
     else exit(EXIT_FAILURE);
