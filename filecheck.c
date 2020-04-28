@@ -6,7 +6,7 @@
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
     if(stat(path, &stats) != -1){
-        return (IS_ISDIR(stats.st_mode))
+        return S_ISDIR(stats.st_mode);
     }
     return 0;
 }
@@ -14,6 +14,8 @@ int isDirectoryExists(const char *path){ //codeforwin.org
 int isFileExists(const char *path){
     struct stat stats;
     stat(path, &stats);
-
-    return S_ISREG(stats.st_mode);
+    if(stat(path,&stats) != -1){
+        return S_ISREG(stats.st_mode);
+    }
+    return 0;
 }
