@@ -97,6 +97,10 @@ int main(int argc, char *argv[]){
     head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
     head=NULL;
 
+    ListSourceFiles_type *desFiles;
+    desFiles = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
+    desFiles = NULL;
+    
     if(argc <= 2){
         printf("Too few arguments\n");
         exit(EXIT_FAILURE);
