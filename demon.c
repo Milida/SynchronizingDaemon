@@ -13,6 +13,11 @@
 #include "filecheck.h"
 #include "filelist.h"
 #include <utime.h>
+#define BUFF_SIZE 64
+
+typedef struct example {
+    char *name;
+} MyExample;
 
 /*
 ** http://www.unixguide.net/unix/programming/2.5.shtml
@@ -118,24 +123,25 @@ int main(int argc, char *argv[]){
     DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
     sourceDir = opendir (source);
-    char *tmp;
-    char *name;
-    char *des;
+    MyExample *name = (MyExample*) malloc( sizeof(MyExample) );
+    name->name = (char*) malloc(KNOWN_GOOD_BUFFER_SIZE);
+    MyExample *des = (MyExample*) malloc( sizeof(MyExample) );
+    des->name = (char*) malloc(KNOWN_GOOD_BUFFER_SIZE);
     //strcpy(name, source);
     //strcat(name,"/");
     //puts(name);
     if (sourceDir != NULL){
         while (ep = readdir (sourceDir)){
             puts(ep->d_name);
-            strcpy(name, source);
-            strcat(name,"/");
-            printf("%s%s\n",name,ep->d_name);
-            if(isFileExists(strcat(name,ep->d_name))){
+            strcpy(name->name, source);
+            strcat(name->name,"/");
+            printf("%s%s\n",name->name,ep->d_name);
+            if(isFileExists(strcat(name->name,ep->d_name))){
                 puts("True");
                 addSourceFile(&head, ep->d_name);
-                strcpy(des,destination);
-                strcat(des,"/");
-                copyFile(name,strcat(des, ep->d_name));
+                strcpy(des->name,destination);
+                //strcat(des->name,"/");
+                //copyFile(name->name,strcat(des->name, ep->d_name));
             }
         }
         (void) closedir (sourceDir);
@@ -180,5 +186,8 @@ int main(int argc, char *argv[]){
     /* Do some task here ... */
     //sleep(); /* wait 30 seconds */
     //}
+    free(head);
+    free(name);
+    free(des);
     exit(EXIT_SUCCESS);
 }
