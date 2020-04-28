@@ -41,7 +41,7 @@ mode_t read_chmod(char *source){
         printf("\nPobrano chmod\n");
         return mode.st_mode;
     }
-    else exit EXIT_FAILURE;
+    else exit(EXIT_FAILURE);
 }
 
 time_t read_time(char *source){
@@ -50,7 +50,7 @@ time_t read_time(char *source){
         printf("\nPobrano datę\n");
         return time.st_mtime;
     }
-    else exit EXIT_FAILURE;
+    else exit(EXIT_FAILURE);
 }
 
 off_t read_size(char *source){
@@ -59,7 +59,7 @@ off_t read_size(char *source){
         printf("\nPobrano rozmiar\n");
         return size.st_size;
     }
-    else exit EXIT_FAILURE;
+    else exit(EXIT_FAILURE);
 }
 
 void copyFile(char *sourceFile, char *destinationFile) {
@@ -69,8 +69,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
 
     if (source < 0 || destination < 0){
         printf("Couldn't open the file");
-        exit EXIT_FAILURE;
-    }
+        exit(EXIT_FAILURE);
     fstat(source, &stbuf);
     sendfile(destination, source, 0, stbuf.st_size);
 
@@ -81,7 +80,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     if(!chmod(destinationFile, &source_chmod)){
         printf("\nPoprawnie nadano uprawnienia\n");
     }
-    else exit EXIT_FAILURE;
+    else exit(EXIT_FAILURE);
 
     struct utimbuf source_time;
     source_time.modtime = read_time(sourceFile);
@@ -89,7 +88,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     if(!utime(destinationFile, source_time)){
         printf("\nPoprawnie przeniesiono stempel czasowy\n");
     }
-    else exit EXIT_FAILURE;
+    else exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]){
@@ -99,21 +98,21 @@ int main(int argc, char *argv[]){
 
     if(argc <= 2){
         printf("Too few arguments\n");
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     if(argc > 3){
         printf("To many arguments\n");
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     printf("Source: %s\n", argv[1]);
     printf("Destination: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
     if (!isDirectoryExists(source)){
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     if(!isDirectoryExists(destination)) {
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
@@ -149,12 +148,12 @@ int main(int argc, char *argv[]){
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0) {
-        exit EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     /* If we got a good PID, then
     we can exit the parent process. */
     if (pid > 0) {
-        exit EXIT_SUCCESS;
+        exit(EXIT_SUCCESS);
     }
     /* Change the file mode mask */
     umask(0);
@@ -163,12 +162,12 @@ int main(int argc, char *argv[]){
     sid = setsid();
     if (sid < 0) {
         /* Log the failure */
-        exit EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     /* Change the current working directory */
     if ((chdir("/")) < 0) {
         /* Log the failure */
-        exit EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     /* Close out the standard file descriptors */
     close(STDIN_FILENO);
@@ -180,5 +179,5 @@ int main(int argc, char *argv[]){
     /* Do some task here ... */
     //sleep(); /* wait 30 seconds */
     //}
-    exit EXIT_SUCCESS;
+    exit(EXIT_SUCCESS);
 }
