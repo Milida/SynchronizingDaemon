@@ -10,9 +10,9 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/sendfile.h>
-#include <fcntl.h>
 #include "filecheck.h"
 #include "filelist.h"
+#include <utime.h>
 
 /*
 ** http://www.unixguide.net/unix/programming/2.5.shtml
@@ -75,7 +75,15 @@ void copyFile(char *sourceFile, char *destinationFile) {
     }
     else exit(EXIT_FAILURE);
 
-    time_t source_time = read_time(sourceFile);
+    //time_t source_time = read_time(sourceFile);
+    struct utimbuf source_time;
+    source_time.actime = 0;
+    source_time.modtime = read_time(sourceFile);
+
+    if(utime(destinationFile, &source_time)==0){
+        printf("\nPoprawnie przeniesiono stempel czasowy\n");
+    }
+    else exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]){
