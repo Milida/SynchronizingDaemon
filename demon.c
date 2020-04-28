@@ -35,9 +35,27 @@
     close(destination);
 }*/
 
+mode_t read_chmod(char *source){
+    struct stat mode;
+    if(lstat(source, &mode)!=-1){
+        printf("\nPobrano chmod\n");
+        return mode.st_mode;
+    }
+    else exit(EXIT_FAILURE);
+}
+
+time_t read_time(char *source){
+    struct stat time;
+    if(lstat(source,&time)!=-1){
+        printf("\nPobrano datę\n");
+        return time.st_mtime;
+    }
+    else exit(EXIT_FAILURE);
+}
+
+
 void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
-    int readSource, writeDes;
     int source = open(sourceFile, O_RDONLY);
     int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
@@ -50,6 +68,14 @@ void copyFile(char *sourceFile, char *destinationFile) {
 
     close(source);
     close(destination);
+
+    mode_t source_chmod = read_chmod(sourceFile);
+    if(chmod(destinationFile, source_chmod)==0){
+        printf("\nPoprawnie nadano uprawnienia\n");
+    }
+    else exit(EXIT_FAILURE);
+
+    time_t source_time = read_time(sourceFile);
 }
 
 int main(int argc, char *argv[]){
@@ -92,13 +118,11 @@ int main(int argc, char *argv[]){
             printf("%s%s\n",name,ep->d_name);
             if(isFileExists(strcat(name,ep->d_name))){
                 puts("True");
-                printf("%s\n"name);
                 addSourceFile(&head, ep->d_name);
 
                 strcpy(des,destination);
                 strcat(des,"/");
                 copyFile(strcat(des, ep->d_name));
-
             }
         }
         (void) closedir (dp);
