@@ -38,20 +38,29 @@
 
 mode_t read_chmod(char *source){
     struct stat mode;
-    if(lstat(source, &mode)!=-1){
+    if(stat(source, &mode) != -1){
         printf("\nPobrano chmod\n");
         return mode.st_mode;
     }
-    else exit(EXIT_FAILURE);
+    else exit EXIT_FAILURE;
 }
 
 time_t read_time(char *source){
     struct stat time;
-    if(lstat(source,&time)!=-1){
+    if(stat(source,&time) != -1){
         printf("\nPobrano datę\n");
         return time.st_mtime;
     }
-    else exit(EXIT_FAILURE);
+    else exit EXIT_FAILURE;
+}
+
+off_t read_size(char *source){
+    struct stat size;
+    if(stat(source, &size) != -1){
+        printf("\nPobrano rozmiar\n");
+        return size.st_size;
+    }
+    else exit EXIT_FAILURE;
 }
 
 
@@ -62,7 +71,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
 
     if (source < 0 || destination < 0){
         printf("Couldn't open the file");
-        exit(EXIT_FAILURE);
+        exit EXIT_FAILURE;
     }
     fstat(source, &stbuf);
     sendfile(destination, source, 0, stbuf.st_size);
@@ -74,15 +83,15 @@ void copyFile(char *sourceFile, char *destinationFile) {
     if(!chmod(destinationFile, source_chmod)==0){
         printf("\nPoprawnie nadano uprawnienia\n");
     }
-    else exit(EXIT_FAILURE);
+    else exit EXIT_FAILURE;
 
     struct utimbuf source_time;
     source_time.modtime = read_time(sourceFile);
-    source_time.actime = NULL;
-    if(utime(destinationFile, source_time)){
+    source_time.actime = time(NULL);
+    if(!utime(destinationFile, source_time)){
         printf("\nPoprawnie przeniesiono stempel czasowy\n");
     }
-    else exit(EXIT_FAILURE);
+    else exit EXIT_FAILURE;
 }
 
 int main(int argc, char *argv[]){
@@ -143,12 +152,12 @@ int main(int argc, char *argv[]){
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0) {
-        exit(EXIT_FAILURE);
+        exit EXIT_FAILURE;
     }
     /* If we got a good PID, then
     we can exit the parent process. */
     if (pid > 0) {
-        exit(EXIT_SUCCESS);
+        exit EXIT_SUCCESS;
     }
     /* Change the file mode mask */
     umask(0);
@@ -157,12 +166,12 @@ int main(int argc, char *argv[]){
     sid = setsid();
     if (sid < 0) {
         /* Log the failure */
-        exit(EXIT_FAILURE);
+        exit EXIT_FAILURE;
     }
     /* Change the current working directory */
     if ((chdir("/")) < 0) {
         /* Log the failure */
-        exit(EXIT_FAILURE);
+        exit EXIT_FAILURE;
     }
     /* Close out the standard file descriptors */
     close(STDIN_FILENO);
@@ -174,5 +183,5 @@ int main(int argc, char *argv[]){
     /* Do some task here ... */
     //sleep(); /* wait 30 seconds */
     //}
-    exit(EXIT_SUCCESS);
+    exit EXIT_SUCCESS;
 }
