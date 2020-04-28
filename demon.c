@@ -10,7 +10,6 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/sendfile.h>
-#include <fcntl.h>
 #include "filecheck.h"
 #include "filelist.h"
 #include <utime.h>
@@ -63,6 +62,37 @@ off_t read_size(char *source){
     else exit EXIT_FAILURE;
 }
 
+void readCopySourceDir(char *source, char *destination){
+    DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
+    struct dirent *ep;
+    sourceDir = opendir (source);
+    char *tmp;
+    char *name;
+    char *des;
+    //strcpy(name, source);
+    //strcat(name,"/");
+    //puts(name);
+    if (sourceDir != NULL){
+        while (ep = readdir (sourceDir)){
+            puts(ep->d_name);
+            strcpy(name, source);
+            strcat(name,"/");
+            printf("%s%s\n",name,ep->d_name);
+            if(isFileExists(strcat(name,ep->d_name))){
+                puts("True");
+                addSourceFile(&head, ep->d_name);
+                strcpy(des,destination);
+                strcat(des,"/");
+                copyFile(strcat(des, ep->d_name));
+            }
+        }
+        (void) closedir (sourceDir);
+    }
+    else{
+        perror ("Couldn't open the directory");
+    }
+    show(head);
+}
 
 void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
@@ -117,36 +147,7 @@ int main(int argc, char *argv[]){
     if(!isDirectoryExists(destination)) {
         return EXIT_FAILURE;
     }
-    DIR *dp; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
-    struct dirent *ep;
-    dp = opendir (source);
-    char *tmp;
-    char *name;
-    char *des;
-    //strcpy(name, source);
-    //strcat(name,"/");
-    //puts(name);
-    if (dp != NULL){
-        while (ep = readdir (dp)){
-            puts(ep->d_name);
-            strcpy(name, source);
-            strcat(name,"/");
-            printf("%s%s\n",name,ep->d_name);
-            if(isFileExists(strcat(name,ep->d_name))){
-                puts("True");
-                addSourceFile(&head, ep->d_name);
-
-                strcpy(des,destination);
-                strcat(des,"/");
-                copyFile(strcat(des, ep->d_name));
-            }
-        }
-        (void) closedir (dp);
-    }
-    else{
-        perror ("Couldn't open the directory");
-    }
-    show(head);
+    readCopySourceDir(source, destination);
     /* Our process ID and Session ID */
     pid_t pid, sid;
     /* Fork off the parent process */
