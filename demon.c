@@ -124,9 +124,9 @@ int main(int argc, char *argv[]){
     struct dirent *ep;
     sourceDir = opendir (source);
     MyExample *name = (MyExample*) malloc( sizeof(MyExample) );
-    name->name = (char*) malloc(KNOWN_GOOD_BUFFER_SIZE);
+    name->name = (char*) malloc(BUFF_SIZE);
     MyExample *des = (MyExample*) malloc( sizeof(MyExample) );
-    des->name = (char*) malloc(KNOWN_GOOD_BUFFER_SIZE);
+    des->name = (char*) malloc(BUFF_SIZE);
     //strcpy(name, source);
     //strcat(name,"/");
     //puts(name);
