@@ -19,8 +19,6 @@ typedef struct example {
     char *name;
 } MyExample;
 
-//#FIXME nie nadaje odpowiedniej daty modyfikacji plikom bez praw dostępu
-
 /*
 ** http://www.unixguide.net/unix/programming/2.5.shtml
 ** About locking mechanism...
