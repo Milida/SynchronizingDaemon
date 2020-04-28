@@ -67,8 +67,10 @@ off_t read_size(char *source){
 void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
-    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
+    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
+    if(errno == EEXIST){
+        puts("Plik %s już istnieje", sourceFile);
+    }
     if (source < 0 || destination < 0) {
         printf("Couldn't open the file");
         return(EXIT_FAILURE);
