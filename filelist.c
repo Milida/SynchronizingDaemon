@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct ListSourceFiles{
-    char *file;
-    struct ListSourceFiles * next;
-} ListSourceFiles_type;
+#include "filelist.h"
 
 void addSourceFile(ListSourceFiles_type **head, char *newFile){
     if(*head!=NULL){

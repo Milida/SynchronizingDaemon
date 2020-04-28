@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include "filecheck.h"
 #include "filelist.h"
+#include <utime.h>
 
 /*
 ** http://www.unixguide.net/unix/programming/2.5.shtml
@@ -70,12 +71,18 @@ void copyFile(char *sourceFile, char *destinationFile) {
     close(destination);
 
     mode_t source_chmod = read_chmod(sourceFile);
-    if(chmod(destinationFile, source_chmod)==0){
+    if(!chmod(destinationFile, source_chmod)==0){
         printf("\nPoprawnie nadano uprawnienia\n");
     }
     else exit(EXIT_FAILURE);
 
-    time_t source_time = read_time(sourceFile);
+    struct utimbuf source_time;
+    source_time.modtime = read_time(sourceFile);
+    source_time.actime = NULL;
+    if(utime(destinationFile, source_time)){
+        printf("\nPoprawnie przeniesiono stempel czasowy\n");
+    }
+    else exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]){
