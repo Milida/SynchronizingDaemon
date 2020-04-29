@@ -43,7 +43,6 @@ typedef struct example {
 mode_t read_chmod(char *source){
     struct stat mode;
     if(stat(source, &mode) != -1){
-        printf("\nPobrano chmod\n");
         return mode.st_mode;
     }
     else exit(EXIT_FAILURE);
@@ -52,7 +51,6 @@ mode_t read_chmod(char *source){
 time_t read_time(char *source){
     struct stat time;
     if(stat(source,&time) != -1){
-        printf("\nPobrano datę\n");
         return time.st_mtime;
     }
     else exit(EXIT_FAILURE);
@@ -61,7 +59,6 @@ time_t read_time(char *source){
 off_t read_size(char *source){
     struct stat size;
     if(stat(source, &size) != -1){
-        printf("\nPobrano rozmiar\n");
         return size.st_size;
     }
     else exit(EXIT_FAILURE);
@@ -70,31 +67,39 @@ off_t read_size(char *source){
 void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
-    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
-    if (source < 0 || destination < 0) {
+    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
+    if(destination < 0 && errno == EEXIST){
+        printf("Plik %s już istnieje  %d\n", sourceFile, errno);
+        if(read_time(sourceFile) == read_time(destinationFile)) return;
+        destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
+    }
+    if ((source < 0 || destination < 0) && errno != EEXIST) {
         printf("Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-    fstat(source, &stbuf);
-    sendfile(destination, source, 0, stbuf.st_size);
+    printf("Copying %s file\n",sourceFile);
+    if(fstat(source, &stbuf)==-1){
+        printf("Fstat errno %d\n",errno);
+    }
+    if(sendfile(destination, source, 0, stbuf.st_size)==-1){
+        printf("%d\n",errno);
+        printf("Couldn't copy the file\n");
+    }
 
     close(source);
     close(destination);
 
     mode_t source_chmod = read_chmod(sourceFile);
-    if(!chmod(destinationFile, source_chmod)){
-        printf("\nPoprawnie nadano uprawnienia\n");
+    if(chmod(destinationFile, source_chmod)){
+        exit(EXIT_FAILURE);
     }
-    else exit(EXIT_FAILURE);
 
     struct utimbuf source_time;
     source_time.modtime = read_time(sourceFile);
     source_time.actime = time(NULL);
-    if(!utime(destinationFile, &source_time)){
-        printf("\nPoprawnie przeniesiono stempel czasowy\n");
+    if(utime(destinationFile, &source_time)){
+        exit(EXIT_FAILURE);
     }
-    else exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]){
@@ -114,8 +119,6 @@ int main(int argc, char *argv[]){
         printf("To many arguments\n");
         exit(EXIT_FAILURE);
     }
-    printf("Source: %s\n", argv[1]);
-    printf("Destination: %s\n", argv[2]);
     char *source = argv[1];
     char *destination = argv[2];
     if (!isDirectoryExists(source)){
@@ -133,15 +136,11 @@ int main(int argc, char *argv[]){
     des->name = (char*) malloc(BUFF_SIZE);
     //strcpy(name, source);
     //strcat(name,"/");
-    //puts(name);
     if (sourceDir != NULL){
         while (ep = readdir (sourceDir)){
-            puts(ep->d_name);
             strcpy(name->name, source);
             strcat(name->name,"/");
-            printf("%s%s\n",name->name,ep->d_name);
             if(isFileExists(strcat(name->name,ep->d_name))){
-                puts("True");
                 addSourceFile(&head, ep->d_name);
                 strcpy(des->name,destination);
                 strcat(des->name,"/");
