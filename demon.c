@@ -169,10 +169,6 @@ int main(int argc, char *argv[]){
         /* Log the failure */
         exit(EXIT_FAILURE);
     }
-    /* Close out the standard file descriptors */
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
     /* Daemon-specific initialization goes here */
     /* The Big Loop */
     while (1) {
@@ -232,7 +228,10 @@ int main(int argc, char *argv[]){
         free(na);
         free(desti);
         sleep(sleepTime);
-        /* Do some task here ... */
     }
+    /* Close out the standard file descriptors */
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
     exit(EXIT_SUCCESS);
 }
