@@ -229,6 +229,7 @@ int main(int argc, char *argv[]){
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0) {
+        syslog(LOG_ERR, "Incorrect child pid");
         exit(EXIT_FAILURE);
     }
     /* If we got a good PID, then
