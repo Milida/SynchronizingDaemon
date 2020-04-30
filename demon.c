@@ -118,6 +118,7 @@ void deleteFile(char *destinationFile, char *sourceFile) {
 
 
 int main(int argc, char *argv[]){
+    unsigned int sleepTime = 300;
     ListSourceFiles_type *head;
     head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
     head=NULL;
@@ -226,6 +227,7 @@ int main(int argc, char *argv[]){
     /* Daemon-specific initialization goes here */
     /* The Big Loop */
     //while (1) {
+    //  sleep(sleepTime);
     /* Do some task here ... */
     //sleep(); /* wait 30 seconds */
     //}
