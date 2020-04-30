@@ -144,6 +144,29 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
     if(argc > 3){
+        switch(argv[3]){
+            case "-r":
+                puts("opcja -r");
+                break;
+            case "s":
+                puts("sleepTime");
+                break;
+            case "d":
+                puts("rozmiar");
+                break;
+            case "-rs":
+                puts("-r i sleepTime");
+                brek;
+            case "-rd":
+                puts("-r i rozmiar");
+                break;
+            case "sd":
+                puts("sleepTime i rozmiar");
+                break;
+            case "-rsd":
+                puts("Wszystkie");
+                break;
+        }
         printf("To many arguments\n");
         syslog(LOG_ERR, "Too many arguments");
         exit(EXIT_FAILURE);
