@@ -143,57 +143,6 @@ int main(int argc, char *argv[]){
     if(!isDirectoryExists(destination)) {
         exit(EXIT_FAILURE);
     }
-
-    DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
-    struct dirent *ep;
-    sourceDir = opendir (source);
-    MyExample *name = (MyExample*) malloc( sizeof(MyExample) );
-    name->name = (char*) malloc(BUFF_SIZE);
-    MyExample *des = (MyExample*) malloc( sizeof(MyExample) );
-    des->name = (char*) malloc(BUFF_SIZE);
-    //strcpy(name, source);
-    //strcat(name,"/");
-    if (sourceDir != NULL){
-        while (ep = readdir (sourceDir)){
-            strcpy(name->name, source);
-            strcat(name->name,"/");
-            if(isFileExists(strcat(name->name,ep->d_name))){
-                addSourceFile(&head, ep->d_name);
-                strcpy(des->name,destination);
-                strcat(des->name,"/");
-                copyFile(name->name,strcat(des->name, ep->d_name));
-            }
-        }
-        (void) closedir (sourceDir);
-    }
-    else{
-        perror ("Couldn't open the directory");
-    }
-    //show(head);
-
-    DIR *desDir;
-    struct dirent *epp;
-    desDir = opendir (destination);
-    MyExample *na =(MyExample *)malloc(sizeof(MyExample));
-    na->name = (char *)malloc(BUFF_SIZE);
-    MyExample *desti =(MyExample *)malloc(sizeof(MyExample));
-    desti->name = (char *)malloc(BUFF_SIZE);
-
-    if (desDir != NULL){
-        while (epp = readdir (desDir)){
-            strcpy(na->name, destination);
-            strcat(na->name,"/");
-            if(isFileExists(strcat(na->name,epp->d_name))){
-                strcpy(desti->name, source);
-                strcat(desti->name,"/");
-                deleteFile(na->name, strcat(desti->name, epp->d_name));
-            }
-        }
-        (void) closedir (desDir);
-    }
-    else{
-        perror ("Couldn't open the directory");
-    }
     /* Our process ID and Session ID */
     pid_t pid, sid;
     /* Fork off the parent process */
@@ -226,15 +175,64 @@ int main(int argc, char *argv[]){
     close(STDERR_FILENO);
     /* Daemon-specific initialization goes here */
     /* The Big Loop */
-    //while (1) {
-    //  sleep(sleepTime);
-    /* Do some task here ... */
-    //sleep(); /* wait 30 seconds */
-    //}
-    free(head);
-    free(name);
-    free(des);
-    free(na);
-    free(desti);
+    while (1) {
+        DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
+        struct dirent *ep;
+        sourceDir = opendir (source);
+        MyExample *name = (MyExample*) malloc( sizeof(MyExample) );
+        name->name = (char*) malloc(BUFF_SIZE);
+        MyExample *des = (MyExample*) malloc( sizeof(MyExample) );
+        des->name = (char*) malloc(BUFF_SIZE);
+        //strcpy(name, source);
+        //strcat(name,"/");
+        if (sourceDir != NULL){
+            while (ep = readdir (sourceDir)){
+                strcpy(name->name, source);
+                strcat(name->name,"/");
+                if(isFileExists(strcat(name->name,ep->d_name))){
+                    addSourceFile(&head, ep->d_name);
+                    strcpy(des->name,destination);
+                    strcat(des->name,"/");
+                    copyFile(name->name,strcat(des->name, ep->d_name));
+                }
+            }
+            (void) closedir (sourceDir);
+        }
+        else{
+            perror ("Couldn't open the directory");
+        }
+        //show(head);
+
+        DIR *desDir;
+        struct dirent *epp;
+        desDir = opendir (destination);
+        MyExample *na =(MyExample *)malloc(sizeof(MyExample));
+        na->name = (char *)malloc(BUFF_SIZE);
+        MyExample *desti =(MyExample *)malloc(sizeof(MyExample));
+        desti->name = (char *)malloc(BUFF_SIZE);
+
+        if (desDir != NULL){
+            while (epp = readdir (desDir)){
+                strcpy(na->name, destination);
+                strcat(na->name,"/");
+                if(isFileExists(strcat(na->name,epp->d_name))){
+                    strcpy(desti->name, source);
+                    strcat(desti->name,"/");
+                    deleteFile(na->name, strcat(desti->name, epp->d_name));
+                }
+            }
+            (void) closedir (desDir);
+        }
+        else{
+            perror ("Couldn't open the directory");
+        }
+        free(head);
+        free(name);
+        free(des);
+        free(na);
+        free(desti);
+        sleep(sleepTime);
+        /* Do some task here ... */
+    }
     exit(EXIT_SUCCESS);
 }
