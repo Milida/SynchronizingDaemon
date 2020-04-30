@@ -155,7 +155,7 @@ void deleteFile(char *destinationFile, char *sourceFile) {
 }
 
 void handler(int signum){
-    puts("Handler");//#FIXME tutaj syslog
+    syslog(LOG_INFO,"Waking a deamon with a signal");
 }
 
 int main(int argc, char *argv[]){
