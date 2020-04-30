@@ -211,6 +211,7 @@ int main(int argc, char *argv[]){
     }
     else{
         puts("Too many arguments");
+        syslog(LOG_ERR, "Too many arguments");
         exit(EXIT_FAILURE);
     }
     char *source = argv[1];
