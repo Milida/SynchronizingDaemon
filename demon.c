@@ -13,7 +13,10 @@
 #include "filecheck.h"
 #include "filelist.h"
 #include <utime.h>
+#include <signal.h>
 #define BUFF_SIZE 64
+
+char *source, *destination;
 
 typedef struct example {
     char *name;
@@ -110,23 +113,19 @@ void deleteFile(char *destinationFile, char *sourceFile) {
         return;
     } else if (remove(destinationFile) == 0)
         printf("\nDeleted successfully %s\n", destinationFile);
-        remove(sourceFile);
+    remove(sourceFile);
 
     close(source);
     close(destination);
 }
 
+void handler(int signum){
+    puts("Handler");//#FIXME tutaj syslog
+}
 
 int main(int argc, char *argv[]){
     unsigned int sleepTime = 300;
-    ListSourceFiles_type *head;
-    head = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
-    head=NULL;
 
-    ListSourceFiles_type *desFiles;
-    desFiles = (ListSourceFiles_type *)malloc(sizeof(ListSourceFiles_type));
-    desFiles = NULL;
-    
     if(argc <= 2){
         printf("Too few arguments\n");
         exit(EXIT_FAILURE);
@@ -135,8 +134,8 @@ int main(int argc, char *argv[]){
         printf("To many arguments\n");
         exit(EXIT_FAILURE);
     }
-    char *source = argv[1];
-    char *destination = argv[2];
+    source = argv[1];
+    destination = argv[2];
     if (!isDirectoryExists(source)){
         exit(EXIT_FAILURE);
     }
@@ -169,9 +168,13 @@ int main(int argc, char *argv[]){
         /* Log the failure */
         exit(EXIT_FAILURE);
     }
+
     /* Daemon-specific initialization goes here */
+    signal(SIGUSR1, handler);
+    int i = 0;
     /* The Big Loop */
     while (1) {
+        printf("%d\n",++i);
         DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
         struct dirent *ep;
         sourceDir = opendir (source);
@@ -186,7 +189,7 @@ int main(int argc, char *argv[]){
                 strcpy(name->name, source);
                 strcat(name->name,"/");
                 if(isFileExists(strcat(name->name,ep->d_name))){
-                    addSourceFile(&head, ep->d_name);
+                    puts("Czytam sourceDir isFileExist");
                     strcpy(des->name,destination);
                     strcat(des->name,"/");
                     copyFile(name->name,strcat(des->name, ep->d_name));
@@ -197,7 +200,6 @@ int main(int argc, char *argv[]){
         else{
             perror ("Couldn't open the directory");
         }
-        //show(head);
 
         DIR *desDir;
         struct dirent *epp;
@@ -222,12 +224,12 @@ int main(int argc, char *argv[]){
         else{
             perror ("Couldn't open the directory");
         }
-        free(head);
         free(name);
         free(des);
         free(na);
         free(desti);
         sleep(sleepTime);
+        /* Do some task here ... */
     }
     /* Close out the standard file descriptors */
     close(STDIN_FILENO);
