@@ -313,6 +313,7 @@ int main(int argc, char *argv[]){
         free(des);
         free(na);
         free(desti);
+        syslog(LOG_INFO, "Daemon go to sleep");
         sleep(sleepTime);
     }
     close(STDIN_FILENO);
