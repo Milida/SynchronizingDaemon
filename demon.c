@@ -113,6 +113,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     printf("Copying %s file\n",sourceFile);
     if(fstat(source, &stbuf)==-1){
         printf("Fstat errno %d\n",errno);
+        syslog(LOG_ERR,"Couldn't copy the file");
     }
     if(sendfile(destination, source, 0, stbuf.st_size)==-1){
         printf("%d\n",errno);
