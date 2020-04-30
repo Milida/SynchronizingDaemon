@@ -159,6 +159,9 @@ int main(int argc, char *argv[]){
             case "sd":
                 puts("sleepTime i rozmiar");
                 break;
+            case "-rsd":
+                puts("Wszystkie");
+                break;
         }
         printf("To many arguments\n");
         exit(EXIT_FAILURE);
