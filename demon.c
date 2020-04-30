@@ -70,6 +70,7 @@ void copy_File(char *sourceFile, char *destinationFile) {
     destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     if ((source < 0 || destination < 0) && errno != EEXIST) {
         printf("Couldn't open the file");
+        syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
     while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
