@@ -29,7 +29,10 @@ mode_t read_chmod(char *source){
     if(stat(source, &mode) != -1){
         return mode.st_mode;
     }
-    else exit(EXIT_FAILURE);
+    else {
+        syslog(LOG_ERR,"Couldn't take a file chmod");
+        exit(EXIT_FAILURE);
+    }
 }
 
 time_t read_time(char *source){
@@ -37,7 +40,10 @@ time_t read_time(char *source){
     if(stat(source,&time) != -1){
         return time.st_mtime;
     }
-    else exit(EXIT_FAILURE);
+    else{
+        syslog(LOG_ERR,"Couldn't take a modification time");
+        exit(EXIT_FAILURE);
+    }
 }
 
 off_t read_size(char *source){
@@ -45,7 +51,10 @@ off_t read_size(char *source){
     if(stat(source, &size) != -1){
         return size.st_size;
     }
-    else exit(EXIT_FAILURE);
+    else{
+        syslog(LOG_ERR,"Couldn't take a file size");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void copy_File(char *sourceFile, char *destinationFile) {
@@ -60,6 +69,7 @@ void copy_File(char *sourceFile, char *destinationFile) {
     destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     if ((source < 0 || destination < 0) && errno != EEXIST) {
         printf("Couldn't open the file");
+        syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
     while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
@@ -72,6 +82,14 @@ void copy_File(char *sourceFile, char *destinationFile) {
 
     mode_t source_chmod = read_chmod(sourceFile);
     if(chmod(destinationFile, source_chmod)){
+        syslog(LOG_ERR,"Couldn't change the chmod");
+        exit(EXIT_FAILURE);
+    }
+    struct utimbuf source_time;
+    source_time.modtime = read_time(sourceFile);
+    source_time.actime = time(NULL);
+    if(utime(destinationFile, &source_time)){
+        syslog(LOG_ERR,"Couldn't change the modification time");
         exit(EXIT_FAILURE);
     }
 }
@@ -88,15 +106,19 @@ void copyFile(char *sourceFile, char *destinationFile) {
     destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     if ((source < 0 || destination < 0) && errno != EEXIST) {
         printf("Couldn't open the file");
+        syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
     printf("Copying %s file\n",sourceFile);
     if(fstat(source, &stbuf)==-1){
         printf("Fstat errno %d\n",errno);
+        syslog(LOG_ERR,"Couldn't copy the file");
+
     }
     if(sendfile(destination, source, 0, stbuf.st_size)==-1){
         printf("%d\n",errno);
         printf("Couldn't copy the file\n");
+        syslog(LOG_ERR,"Couldn't copy the file");
     }
 
     close(source);
@@ -104,6 +126,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
 
     mode_t source_chmod = read_chmod(sourceFile);
     if(chmod(destinationFile, source_chmod)){
+        syslog(LOG_ERR,"Couldn't change the chmod");
         exit(EXIT_FAILURE);
     }
 
@@ -111,6 +134,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     source_time.modtime = read_time(sourceFile);
     source_time.actime = time(NULL);
     if(utime(destinationFile, &source_time)){
+        syslog(LOG_ERR,"Couldn't change the modification time");
         exit(EXIT_FAILURE);
     }
 }
@@ -123,6 +147,7 @@ void deleteFile(char *destinationFile, char *sourceFile) {
         return;
     } else if (remove(destinationFile) == 0)
         printf("\nDeleted successfully %s\n", destinationFile);
+        syslog(LOG_INFO,"File deleted successfully");
     remove(sourceFile);
 
     close(source);
@@ -130,7 +155,7 @@ void deleteFile(char *destinationFile, char *sourceFile) {
 }
 
 void handler(int signum){
-    puts("Handler");//#FIXME tutaj syslog
+    syslog(LOG_INFO,"Waking the deamon with a signal");
 }
 
 int main(int argc, char *argv[]){
@@ -144,32 +169,32 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
     if(argc > 3){
-        switch(argv[3]){
-            case "-r":
-                puts("opcja -r");
-                break;
-            case "s":
-                puts("sleepTime");
-                break;
-            case "d":
-                puts("rozmiar");
-                break;
-            case "-rs":
-                puts("-r i sleepTime");
-                brek;
-            case "-rd":
-                puts("-r i rozmiar");
-                break;
-            case "sd":
-                puts("sleepTime i rozmiar");
-                break;
-            case "-rsd":
-                puts("Wszystkie");
-                break;
+        if(argv[3] == "-r") {
+            puts("opcja -r");
         }
-        printf("To many arguments\n");
-        syslog(LOG_ERR, "Too many arguments");
-        exit(EXIT_FAILURE);
+        else if (argv[3] == "s"){
+            puts("sleepTime");
+        }
+        else if(argv[3] == "d"){
+            puts("rozmiar");
+        }
+        else if(argv[3] == "-rs"){
+            puts("-r i sleepTime");
+        }
+        else if(argv[3] == "-rd"){
+            puts("-r i rozmiar");
+        }
+        else if(argv[3] == "sd"){
+            puts("sleepTime i rozmiar");
+        }
+        else if(argv[3] == "-rsd"){
+            puts("Wszystkie");
+        }
+        else{
+            printf("To many arguments\n");
+            syslog(LOG_ERR, "Too many arguments");
+            exit(EXIT_FAILURE);
+        }
     }
     char *source = argv[1];
     char *destination = argv[2];
@@ -187,11 +212,13 @@ int main(int argc, char *argv[]){
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0) {
+        syslog(LOG_ERR, "Incorrect child pid");
         exit(EXIT_FAILURE);
     }
     /* If we got a good PID, then
     we can exit the parent process. */
     if (pid > 0) {
+        syslog(LOG_INFO, "Correct child pid");
         exit(EXIT_SUCCESS);
     }
     /* Change the file mode mask */
@@ -200,12 +227,12 @@ int main(int argc, char *argv[]){
     /* Create a new SID for the child process */
     sid = setsid();
     if (sid < 0) {
-        /* Log the failure */
+        syslog(LOG_ERR, "Incorrect SessionID");
         exit(EXIT_FAILURE);
     }
     /* Change the current working directory */
     if ((chdir("/")) < 0) {
-        /* Log the failure */
+        syslog(LOG_ERR, "Couldn't change the current working directory");
         exit(EXIT_FAILURE);
     }
 
@@ -236,7 +263,8 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(sourceDir);
         } else {
-            perror("Couldn't open the directory");
+            syslog(LOG_ERR, "Coldn't open the source directory");
+            perror("Couldn't open the source directory");
         }
 
         DIR *desDir;
@@ -259,12 +287,14 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(desDir);
         } else {
+            syslog(LOG_ERR, "Coldn't open the destination directory")
             perror("Couldn't open the directory");
         }
         free(name);
         free(des);
         free(na);
         free(desti);
+        syslog(LOG_INFO, "Daemon go to sleep")
         sleep(sleepTime);
     }
     close(STDIN_FILENO);
