@@ -250,6 +250,7 @@ int main(int argc, char *argv[]){
     }
     /* Change the current working directory */
     if ((chdir("/")) < 0) {
+        syslog(LOG_ERR, "Couldn't change the current working directory");
         /* Log the failure */
         exit(EXIT_FAILURE);
     }
