@@ -244,6 +244,7 @@ int main(int argc, char *argv[]){
     /* Create a new SID for the child process */
     sid = setsid();
     if (sid < 0) {
+        syslog(LOG_ERR, "Incorrect SessionID");
         /* Log the failure */
         exit(EXIT_FAILURE);
     }
