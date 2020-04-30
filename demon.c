@@ -135,43 +135,28 @@ void handler(int signum){
 
 int main(int argc, char *argv[]){
     unsigned int sleepTime = 300;
+    //daje tutaj, najwyżej się przeniesie
+    openlog("Deamon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
+
     if(argc <= 2){
         printf("Too few arguments\n");
+        syslog(LOG_ERR, "Too few arguments");
         exit(EXIT_FAILURE);
     }
     if(argc > 3){
-        switch(argv[3]){
-            case "-r":
-                puts("opcja -r");
-                break;
-            case "s":
-                puts("sleepTime");
-                break;
-            case "d":
-                puts("rozmiar");
-                break;
-            case "-rs":
-                puts("-r i sleepTime");
-                brek;
-            case "-rd":
-                puts("-r i rozmiar");
-                break;
-            case "sd":
-                puts("sleepTime i rozmiar");
-                break;
-            case "-rsd":
-                puts("Wszystkie");
-                break;
-        }
         printf("To many arguments\n");
+        syslog(LOG_ERR, "Too many arguments");
         exit(EXIT_FAILURE);
     }
     char *source = argv[1];
     char *destination = argv[2];
     if (!isDirectoryExists(source)){
+        syslog(LOG_ERR, "Source directory doesn't exist");
         exit(EXIT_FAILURE);
     }
+
     if(!isDirectoryExists(destination)) {
+        syslog(LOG_ERR, "Destination directory doesn't exist");
         exit(EXIT_FAILURE);
     }
     /* Our process ID and Session ID */
@@ -207,65 +192,61 @@ int main(int argc, char *argv[]){
     while (1) {
         DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
         struct dirent *ep;
-        sourceDir = opendir (source);
-        MyExample *name = (MyExample*) malloc( sizeof(MyExample) );
-        name->name = (char*) malloc(BUFF_SIZE);
-        MyExample *des = (MyExample*) malloc( sizeof(MyExample) );
-        des->name = (char*) malloc(BUFF_SIZE);
+        sourceDir = opendir(source);
+        MyExample *name = (MyExample *) malloc(sizeof(MyExample));
+        name->name = (char *) malloc(BUFF_SIZE);
+        MyExample *des = (MyExample *) malloc(sizeof(MyExample));
+        des->name = (char *) malloc(BUFF_SIZE);
         //strcpy(name, source);
         //strcat(name,"/");
-        if (sourceDir != NULL){
-            while (ep = readdir (sourceDir)){
+        if (sourceDir != NULL) {
+            while (ep = readdir(sourceDir)) {
                 strcpy(name->name, source);
-                strcat(name->name,"/");
-                if(isFileExists(strcat(name->name,ep->d_name))){
-                    strcpy(des->name,destination);
-                    strcat(des->name,"/");
-                    if(read_size(name->name) < 15){
-                        copy_File(name->name,strcat(des->name, ep->d_name));
-                    }
-                    else copyFile(name->name,strcat(des->name, ep->d_name));
+                strcat(name->name, "/");
+                if (isFileExists(strcat(name->name, ep->d_name))) {
+                    strcpy(des->name, destination);
+                    strcat(des->name, "/");
+                    if (read_size(name->name) < 15) {
+                        copy_File(name->name, strcat(des->name, ep->d_name));
+                    } else copyFile(name->name, strcat(des->name, ep->d_name));
                 }
             }
-            (void) closedir (sourceDir);
-        }
-        else{
-            perror ("Couldn't open the directory");
+            (void) closedir(sourceDir);
+        } else {
+            perror("Couldn't open the directory");
         }
 
         DIR *desDir;
         struct dirent *epp;
-        desDir = opendir (destination);
-        MyExample *na =(MyExample *)malloc(sizeof(MyExample));
-        na->name = (char *)malloc(BUFF_SIZE);
-        MyExample *desti =(MyExample *)malloc(sizeof(MyExample));
-        desti->name = (char *)malloc(BUFF_SIZE);
+        desDir = opendir(destination);
+        MyExample *na = (MyExample *) malloc(sizeof(MyExample));
+        na->name = (char *) malloc(BUFF_SIZE);
+        MyExample *desti = (MyExample *) malloc(sizeof(MyExample));
+        desti->name = (char *) malloc(BUFF_SIZE);
 
-        if (desDir != NULL){
-            while (epp = readdir (desDir)){
+        if (desDir != NULL) {
+            while (epp = readdir(desDir)) {
                 strcpy(na->name, destination);
-                strcat(na->name,"/");
-                if(isFileExists(strcat(na->name,epp->d_name))){
+                strcat(na->name, "/");
+                if (isFileExists(strcat(na->name, epp->d_name))) {
                     strcpy(desti->name, source);
-                    strcat(desti->name,"/");
+                    strcat(desti->name, "/");
                     deleteFile(na->name, strcat(desti->name, epp->d_name));
                 }
             }
-            (void) closedir (desDir);
-        }
-        else{
-            perror ("Couldn't open the directory");
+            (void) closedir(desDir);
+        } else {
+            perror("Couldn't open the directory");
         }
         free(name);
         free(des);
         free(na);
         free(desti);
         sleep(sleepTime);
-        /* Do some task here ... */
     }
-    /* Close out the standard file descriptors */
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
+    closelog();
     exit(EXIT_SUCCESS);
 }
