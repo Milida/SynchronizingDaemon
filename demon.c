@@ -282,6 +282,7 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(sourceDir);
         } else {
+            syslog(LOG_ERR, "Coldn't open the source directory");
             perror("Couldn't open the directory");
         }
 
