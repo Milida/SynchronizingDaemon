@@ -144,32 +144,32 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
     if(argc > 3){
-        switch(argv[3]){
-            case "-r":
-                puts("opcja -r");
-                break;
-            case "s":
-                puts("sleepTime");
-                break;
-            case "d":
-                puts("rozmiar");
-                break;
-            case "-rs":
-                puts("-r i sleepTime");
-                brek;
-            case "-rd":
-                puts("-r i rozmiar");
-                break;
-            case "sd":
-                puts("sleepTime i rozmiar");
-                break;
-            case "-rsd":
-                puts("Wszystkie");
-                break;
+        if(argv[3] == "-r") {
+            puts("opcja -r");
         }
-        printf("To many arguments\n");
-        syslog(LOG_ERR, "Too many arguments");
-        exit(EXIT_FAILURE);
+        else if (argv[3] == "s"){
+            puts("sleepTime");
+        }
+        else if(argv[3] == "d"){
+            puts("rozmiar");
+        }
+        else if(argv[3] == "-rs"){
+            puts("-r i sleepTime")
+        }
+        else if(argv[3] == "-rd"){
+            puts("-r i rozmiar");
+        }
+        else if(argv[3] == "sd"){
+            puts("sleepTime i rozmiar");
+        }
+        else if(argv[3] == "-rsd"){
+            puts("Wszystkie");
+        }
+        else{
+            printf("To many arguments\n");
+            syslog(LOG_ERR, "Too many arguments");
+            exit(EXIT_FAILURE);
+        }
     }
     char *source = argv[1];
     char *destination = argv[2];
