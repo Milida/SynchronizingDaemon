@@ -86,6 +86,13 @@ void copy_File(char *sourceFile, char *destinationFile) {
         syslog(LOG_ERR,"Couldn't change the chmod");
         exit(EXIT_FAILURE);
     }
+    struct utimbuf source_time;
+    source_time.modtime = read_time(sourceFile);
+    source_time.actime = time(NULL);
+    if(utime(destinationFile, &source_time)){
+        syslog(LOG_ERR,"Couldn't change the modification time");
+        exit(EXIT_FAILURE);
+    }
 }
 
 
