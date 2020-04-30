@@ -126,6 +126,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
 
     mode_t source_chmod = read_chmod(sourceFile);
     if(chmod(destinationFile, source_chmod)){
+        syslog(LOG_ERR,"Couldn't change the chmod");
         exit(EXIT_FAILURE);
     }
 
