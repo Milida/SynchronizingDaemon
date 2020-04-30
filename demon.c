@@ -170,9 +170,32 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
     if(argc > 3){
-        printf("To many arguments\n");
-        syslog(LOG_ERR, "Too many arguments");
-        exit(EXIT_FAILURE);
+        if(argv[3] == "-r") {
+            puts("opcja -r");
+        }
+        else if (argv[3] == "s"){
+            puts("sleepTime");
+        }
+        else if(argv[3] == "d"){
+            puts("rozmiar");
+        }
+        else if(argv[3] == "-rs"){
+            puts("-r i sleepTime")
+        }
+        else if(argv[3] == "-rd"){
+            puts("-r i rozmiar");
+        }
+        else if(argv[3] == "sd"){
+            puts("sleepTime i rozmiar");
+        }
+        else if(argv[3] == "-rsd"){
+            puts("Wszystkie");
+        }
+        else{
+            printf("To many arguments\n");
+            syslog(LOG_ERR, "Too many arguments");
+            exit(EXIT_FAILURE);
+        }
     }
     char *source = argv[1];
     char *destination = argv[2];
