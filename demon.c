@@ -143,10 +143,11 @@ void deleteFile(char *destinationFile, char *sourceFile) {
     int destination = open(destinationFile, O_RDONLY);
     int source = open(sourceFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
     if (source < 0 && errno == EEXIST) {
-        printf("Plik %s już istnieje  \n", sourceFile);
+        printf("Plik %s już istnieje  %d\n", sourceFile, errno);
         return;
     } else if (remove(destinationFile) == 0)
         printf("\nDeleted successfully %s\n", destinationFile);
+    syslog(LOG_INFO,"File deleted successfully");
     remove(sourceFile);
 
     close(source);
