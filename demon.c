@@ -23,6 +23,7 @@ typedef struct example {
 ** http://www.unixguide.net/unix/programming/2.5.shtml
 ** About locking mechanism...
 */
+
 /*void copy_File(char *sourceFile, char *destinationFile) {
     char bufor[4096];
     int readSource, writeDes;
@@ -101,6 +102,20 @@ void copyFile(char *sourceFile, char *destinationFile) {
         exit(EXIT_FAILURE);
     }
 }
+void deleteFile(char *destinationFile, char *sourceFile) {
+    int destination = open(destinationFile, O_RDONLY);
+    int source = open(sourceFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
+    if (source < 0 && errno == EEXIST) {
+        printf("Plik %s już istnieje  %d\n", sourceFile, errno);
+        return;
+    } else if (remove(destinationFile) == 0)
+        printf("\nDeleted successfully %s\n", destinationFile);
+        remove(sourceFile);
+
+    close(source);
+    close(destination);
+}
+
 
 int main(int argc, char *argv[]){
     ListSourceFiles_type *head;
@@ -127,6 +142,7 @@ int main(int argc, char *argv[]){
     if(!isDirectoryExists(destination)) {
         exit(EXIT_FAILURE);
     }
+
     DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
     sourceDir = opendir (source);
@@ -152,7 +168,31 @@ int main(int argc, char *argv[]){
     else{
         perror ("Couldn't open the directory");
     }
-    show(head);
+    //show(head);
+
+    DIR *desDir;
+    struct dirent *epp;
+    desDir = opendir (destination);
+    MyExample *na =(MyExample *)malloc(sizeof(MyExample));
+    na->name = (char *)malloc(BUFF_SIZE);
+    MyExample *desti =(MyExample *)malloc(sizeof(MyExample));
+    desti->name = (char *)malloc(BUFF_SIZE);
+
+    if (desDir != NULL){
+        while (epp = readdir (desDir)){
+            strcpy(na->name, destination);
+            strcat(na->name,"/");
+            if(isFileExists(strcat(na->name,epp->d_name))){
+                strcpy(desti->name, source);
+                strcat(desti->name,"/");
+                deleteFile(na->name, strcat(desti->name, epp->d_name));
+            }
+        }
+        (void) closedir (desDir);
+    }
+    else{
+        perror ("Couldn't open the directory");
+    }
     /* Our process ID and Session ID */
     pid_t pid, sid;
     /* Fork off the parent process */
@@ -192,5 +232,7 @@ int main(int argc, char *argv[]){
     free(head);
     free(name);
     free(des);
+    free(na);
+    free(desti);
     exit(EXIT_SUCCESS);
 }
