@@ -235,6 +235,7 @@ int main(int argc, char *argv[]){
     /* If we got a good PID, then
     we can exit the parent process. */
     if (pid > 0) {
+        syslog(LOG_INFO, "Correct child pid");
         exit(EXIT_SUCCESS);
     }
     /* Change the file mode mask */
