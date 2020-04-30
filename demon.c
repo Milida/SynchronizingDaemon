@@ -30,7 +30,10 @@ mode_t read_chmod(char *source){
     if(stat(source, &mode) != -1){
         return mode.st_mode;
     }
-    else exit(EXIT_FAILURE);
+    else {
+        syslog(LOG_ERR,"Couldn't take a file chmod");
+        exit(EXIT_FAILURE);
+    }
 }
 
 time_t read_time(char *source){
@@ -38,7 +41,10 @@ time_t read_time(char *source){
     if(stat(source,&time) != -1){
         return time.st_mtime;
     }
-    else exit(EXIT_FAILURE);
+    else{
+        syslog(LOG_ERR,"Couldn't take a modification time");
+        exit(EXIT_FAILURE);
+    }
 }
 
 off_t read_size(char *source){
@@ -46,7 +52,10 @@ off_t read_size(char *source){
     if(stat(source, &size) != -1){
         return size.st_size;
     }
-    else exit(EXIT_FAILURE);
+    else{
+        syslog(LOG_ERR,"Couldn't take a file size");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void copy_File(char *sourceFile, char *destinationFile) {
