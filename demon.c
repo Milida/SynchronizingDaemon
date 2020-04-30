@@ -24,23 +24,6 @@ typedef struct example {
 ** About locking mechanism...
 */
 
-/*void copy_File(char *sourceFile, char *destinationFile) {
-    char bufor[4096];
-    int readSource, writeDes;
-    int source = open(sourceFile, O_RDONLY);
-    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
-    if (source < 0 || destination < 0){
-        printf("Couldn't open the file");
-        exit(EXIT_FAILURE);
-    }
-    while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
-        writeDes = write(destination, bufor, (ssize_t) readSource);
-    }
-    close(source);
-    close(destination);
-}*/
-
 mode_t read_chmod(char *source){
     struct stat mode;
     if(stat(source, &mode) != -1){
@@ -65,6 +48,35 @@ off_t read_size(char *source){
     else exit(EXIT_FAILURE);
 }
 
+void copy_File(char *sourceFile, char *destinationFile) {
+    char bufor[4096];
+    int readSource, writeDes;
+    int source = open(sourceFile, O_RDONLY);
+    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
+    if(destination < 0 && errno == EEXIST){
+        printf("Plik %s już istnieje  %d\n", sourceFile, errno);
+        if(read_time(sourceFile) == read_time(destinationFile)) return;
+    }
+    destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
+    if ((source < 0 || destination < 0) && errno != EEXIST) {
+        printf("Couldn't open the file");
+        exit(EXIT_FAILURE);
+    }
+    while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
+        writeDes = write(destination, bufor, (ssize_t) readSource);
+    }
+    printf("Copying %s file\n",sourceFile);
+
+    close(source);
+    close(destination);
+
+    mode_t source_chmod = read_chmod(sourceFile);
+    if(chmod(destinationFile, source_chmod)){
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 void copyFile(char *sourceFile, char *destinationFile) {
     struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
@@ -72,8 +84,8 @@ void copyFile(char *sourceFile, char *destinationFile) {
     if(destination < 0 && errno == EEXIST){
         printf("Plik %s już istnieje  %d\n", sourceFile, errno);
         if(read_time(sourceFile) == read_time(destinationFile)) return;
-        destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     }
+    destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     if ((source < 0 || destination < 0) && errno != EEXIST) {
         printf("Couldn't open the file");
         exit(EXIT_FAILURE);
@@ -102,6 +114,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
         exit(EXIT_FAILURE);
     }
 }
+
 void deleteFile(char *destinationFile, char *sourceFile) {
     int destination = open(destinationFile, O_RDONLY);
     int source = open(sourceFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
@@ -135,7 +148,7 @@ int main(int argc, char *argv[]){
     char *destination = argv[2];
     if (!isDirectoryExists(source)){
         exit(EXIT_FAILURE);
-    }
+    }puts("Działa!");
     if(!isDirectoryExists(destination)) {
         exit(EXIT_FAILURE);
     }
@@ -186,7 +199,10 @@ int main(int argc, char *argv[]){
                 if(isFileExists(strcat(name->name,ep->d_name))){
                     strcpy(des->name,destination);
                     strcat(des->name,"/");
-                    copyFile(name->name,strcat(des->name, ep->d_name));
+                    if(read_size(name->name) < 15){
+                        copy_File(name->name,strcat(des->name, ep->d_name));
+                    }
+                    else copyFile(name->name,strcat(des->name, ep->d_name));
                 }
             }
             (void) closedir (sourceDir);
