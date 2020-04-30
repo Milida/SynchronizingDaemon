@@ -10,13 +10,10 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/sendfile.h>
-#include "filecheck.h"
-#include "filelist.h"
+#include "filelib.h"
 #include <utime.h>
 #include <signal.h>
 #define BUFF_SIZE 64
-
-char *source, *destination;
 
 typedef struct example {
     char *name;
@@ -134,8 +131,8 @@ int main(int argc, char *argv[]){
         printf("To many arguments\n");
         exit(EXIT_FAILURE);
     }
-    source = argv[1];
-    destination = argv[2];
+    char *source = argv[1];
+    char *destination = argv[2];
     if (!isDirectoryExists(source)){
         exit(EXIT_FAILURE);
     }
@@ -171,10 +168,8 @@ int main(int argc, char *argv[]){
 
     /* Daemon-specific initialization goes here */
     signal(SIGUSR1, handler);
-    int i = 0;
     /* The Big Loop */
     while (1) {
-        printf("%d\n",++i);
         DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
         struct dirent *ep;
         sourceDir = opendir (source);
@@ -189,7 +184,6 @@ int main(int argc, char *argv[]){
                 strcpy(name->name, source);
                 strcat(name->name,"/");
                 if(isFileExists(strcat(name->name,ep->d_name))){
-                    puts("Czytam sourceDir isFileExist");
                     strcpy(des->name,destination);
                     strcat(des->name,"/");
                     copyFile(name->name,strcat(des->name, ep->d_name));
