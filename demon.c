@@ -306,6 +306,7 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(desDir);
         } else {
+            syslog(LOG_ERR, "Coldn't open the destination directory")
             perror("Couldn't open the directory");
         }
         free(name);
