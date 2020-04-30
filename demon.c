@@ -118,6 +118,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     if(sendfile(destination, source, 0, stbuf.st_size)==-1){
         printf("%d\n",errno);
         printf("Couldn't copy the file\n");
+        syslog(LOG_ERR,"Couldn't copy the file");
     }
 
     close(source);
