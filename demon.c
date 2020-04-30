@@ -135,12 +135,31 @@ void handler(int signum){
 
 int main(int argc, char *argv[]){
     unsigned int sleepTime = 300;
-
     if(argc <= 2){
         printf("Too few arguments\n");
         exit(EXIT_FAILURE);
     }
     if(argc > 3){
+        switch(argv[3]){
+            case "-r":
+                puts("opcja -r");
+                break;
+            case "s":
+                puts("sleepTime");
+                break;
+            case "d":
+                puts("rozmiar");
+                break;
+            case "-rs":
+                puts("-r i sleepTime");
+                brek;
+            case "-rd":
+                puts("-r i rozmiar");
+                break;
+            case "sd":
+                puts("sleepTime i rozmiar");
+                break;
+        }
         printf("To many arguments\n");
         exit(EXIT_FAILURE);
     }
@@ -148,7 +167,7 @@ int main(int argc, char *argv[]){
     char *destination = argv[2];
     if (!isDirectoryExists(source)){
         exit(EXIT_FAILURE);
-    }puts("Działa!");
+    }
     if(!isDirectoryExists(destination)) {
         exit(EXIT_FAILURE);
     }
