@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     signal(SIGUSR1, handler);
     /* The Big Loop */
     while (1) {
-        demonCP(source, destination, recursive, fileSize);
+        demonCp(source, destination, recursive, fileSize);
         syslog(LOG_INFO, "Daemon goes to sleep");
         if ((sleep(sleepTime)) == 0)
             syslog(LOG_INFO, "Daemon wakes up");

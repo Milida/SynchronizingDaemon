@@ -145,7 +145,6 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize){
                 puts(destination);
                 des = catDir(des, destination,ep->d_name);
                 copyFile(name, des, fileSize);
-                //free(des);
             } else if (isDirectoryExists(name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
                 des = catDir(des, destination, ep->d_name);
                 copyDir(name, des, recursive, fileSize);
