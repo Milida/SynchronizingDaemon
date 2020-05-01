@@ -1,5 +1,9 @@
 #include "filelib.h"
 
+void handler(int signum){
+    syslog(LOG_INFO,"Waking a deamon with a signal");
+}
+
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;
     if(stat(path, &stats) != -1)

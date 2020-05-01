@@ -1,18 +1,5 @@
 #include "filelib.h"
 
-typedef struct al {
-    char *name;
-} allocation;
-
-/*
-** http://www.unixguide.net/unix/programming/2.5.shtml
-** About locking mechanism...
-*/
-
-void handler(int signum){
-    syslog(LOG_INFO,"Waking a deamon with a signal");
-}
-
 int main(int argc, char *argv[]) {
     unsigned int sleepTime = 300;
     bool recursive = false;

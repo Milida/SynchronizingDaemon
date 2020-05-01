@@ -17,6 +17,11 @@
 #include <stdbool.h>
 #define BUFF_SIZE 64
 
+typedef struct al {
+    char *name;
+} allocation;
+
+void handler(int signum);
 int isDirectoryExists(const char *path);
 int isFileExists(const char *path);
 mode_t read_chmod(char *source);
