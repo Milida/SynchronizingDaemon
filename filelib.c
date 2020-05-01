@@ -99,7 +99,7 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
 void deleteFile(char *sourceFile, char *destinationFile) {
     if(isFileExists(destinationFile) && !isFileExists(sourceFile)){
         if(remove(destinationFile)==0){
-            syslog(LOG_INFO,"File deleted successfully");
+            syslog(LOG_INFO,"File deleted successfully %s", destinationFile);
         }
     }
 }
@@ -166,7 +166,7 @@ void deleteFromDir(char *source, char *destination, bool recursive){
             else if(recursive && (isDirectoryExists(desti) && !isDirectoryExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
                 deleteFromDir(src, desti, recursive);
                 if(!rmdir(desti)){
-                    syslog(LOG_INFO,"File deleted successfully");
+                    syslog(LOG_INFO,"Directory deleted successfully %s",desti);
                 }
             }
         }

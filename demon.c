@@ -4,58 +4,44 @@ int main(int argc, char *argv[]) {
     unsigned int sleepTime = 300;
     bool recursive = false;
     int fileSize = 30;
-    //daje tutaj, najwyżej się przeniesie
-    openlog("Deamon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
-
-    if (argc <= 2) { //#FIXME popraw  na getopt
-        printf("Too few arguments\n");
-        syslog(LOG_ERR, "Too few arguments");
-        exit(EXIT_FAILURE);
-    }
-    if (argc == 4) {
-        if (strcmp(argv[3], "-r")) {
-            printf("Invalid number of arguments\n");
-            syslog(LOG_ERR, "Invalid number of arguments");
-            exit(EXIT_FAILURE);
-        } else {
-            recursive = true;
-        }
-    } else if (argc == 5) {
-        if (!strcmp(argv[3], "s")) {
-            sleepTime = atoi(argv[4]);
-        } else if (!strcmp(argv[3], "d")) {
-            fileSize = atoi(argv[4]);
-        } else if (!strcmp(argv[3], "-rs")) {
-            recursive = true;
-            sleepTime = atoi(argv[4]);
-        } else if (!strcmp(argv[3], "-rd")) {
-            recursive = true;
-            fileSize = atoi(argv[4]);
-        } else puts("Nieprawidłowy argument");
-    } else if (argc == 6) {
-        if (!strcmp(argv[3], "sd")) {
-            sleepTime = atoi(argv[4]);
-            fileSize = atoi(argv[5]);
-        } else if (!strcmp(argv[3], "-rsd")) {
-            recursive = true;
-            sleepTime = atoi(argv[4]);
-            fileSize = atoi(argv[5]);
-        } else puts("Nieprawidłowy argument");
-    } else {
-        puts("Too many arguments");
-        syslog(LOG_ERR, "Too many arguments");
-        exit(EXIT_FAILURE);
-    }
+    int choice;
     char *source = argv[1];
     char *destination = argv[2];
     if (!isDirectoryExists(source)) {
+        puts("Source directory doesn't exist");
         syslog(LOG_ERR, "Source directory doesn't exist");
         exit(EXIT_FAILURE);
     }
     if (!isDirectoryExists(destination)) {
+        puts("Destination directory doesn't exist");
         syslog(LOG_ERR, "Destination directory doesn't exist");
         exit(EXIT_FAILURE);
     }
+    //daje tutaj, najwyżej się przeniesie
+    openlog("Deamon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
+    while((choice = getopt(argc,argv,"rs:d:"))!=-1){
+        switch(choice){
+            case 'r':
+                recursive = true;
+                break;
+            case 's':
+                sleepTime = atoi(optarg);
+                break;
+            case 'd':
+                fileSize = atoi(optarg);
+                break;
+            default:
+                puts("No such option");
+                syslog(LOG_ERR, "No such option");
+                exit(EXIT_FAILURE);
+        }
+    }
+    if(optind >= argc){
+        puts("Missing an argument after options");
+        syslog(LOG_ERR, "Missing");
+        exit(EXIT_FAILURE);
+    }
+
     /* Our process ID and Session ID */
     pid_t pid, sid;
     /* Fork off the parent process */
