@@ -49,45 +49,9 @@ off_t read_size(char *source){
     }
 }
 
-void copy_File(char *sourceFile, char *destinationFile) {
-    char bufor[4096];
-    int readSource, writeDes;
-    int source = open(sourceFile, O_RDONLY);
-    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
-    if(destination < 0 && errno == EEXIST){
-        //("Plik %s już istnieje\n", sourceFile);
-        if(read_time(sourceFile) == read_time(destinationFile)) return;
-    }
-    destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
-    if ((source < 0 || destination < 0) && errno != EEXIST) {
-        printf("Couldn't open the file");
-        syslog(LOG_ERR,"Couldn't open the file");
-        exit(EXIT_FAILURE);
-    }
-    while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
-        writeDes = write(destination, bufor, (ssize_t) readSource);
-    }
-    syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
-   // printf("Copying %s file\n",sourceFile);
-
-    close(source);
-    close(destination);
-
-    mode_t source_chmod = read_chmod(sourceFile);
-    if(chmod(destinationFile, source_chmod)){
-        syslog(LOG_ERR,"Couldn't change the chmod");
-        exit(EXIT_FAILURE);
-    }
-    struct utimbuf source_time;
-    source_time.modtime = read_time(sourceFile);
-    source_time.actime = time(NULL);
-    if(utime(destinationFile, &source_time)){
-        syslog(LOG_ERR,"Couldn't change the modification time");
-        exit(EXIT_FAILURE);
-    }
-}
-
 void copyFile(char *sourceFile, char *destinationFile) {
+    char bufor[4096]; //małe
+    int readSource, writeDes; //małe
     struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
     int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
@@ -101,15 +65,22 @@ void copyFile(char *sourceFile, char *destinationFile) {
         syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-    //printf("Copying %s file\n",sourceFile);
-    if(fstat(source, &stbuf)==-1){
-       // printf("Fstat errno %d\n",errno);
-        syslog(LOG_ERR,"Couldn't copy the file");
+    if (read_size(sourceFile) < fileSize) {
+        while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
+            writeDes = write(destination, bufor, (ssize_t) readSource);
+        }
     }
-    if(sendfile(destination, source, 0, stbuf.st_size)==-1){
-        //printf("%d\n",errno);
-       // printf("Couldn't copy the file\n");
-        syslog(LOG_ERR,"Couldn't copy the file");
+    else {
+        //printf("Copying %s file\n",sourceFile);
+        if (fstat(source, &stbuf) == -1) {
+            // printf("Fstat errno %d\n",errno);
+            syslog(LOG_ERR, "Couldn't copy the file");
+        }
+        if (sendfile(destination, source, 0, stbuf.st_size) == -1) {
+            //printf("%d\n",errno);
+            // printf("Couldn't copy the file\n");
+            syslog(LOG_ERR, "Couldn't copy the file");
+        }
     }
     syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
 
@@ -155,8 +126,6 @@ void demonCp (static char *source, static char *destination, bool recursive, int
     name->name = (char *) malloc(BUFF_SIZE);
     allocation *des = (allocation *) malloc(sizeof(allocation));
     des->name = (char *) malloc(BUFF_SIZE);
-    //strcpy(name, source);
-    //strcat(name,"/");
     if (sourceDir != NULL) {
         while (ep = readdir(sourceDir)) {
             strcpy(name->name, source);
@@ -164,9 +133,7 @@ void demonCp (static char *source, static char *destination, bool recursive, int
             if (isFileExists(strcat(name->name, ep->d_name))) {
                 strcpy(des->name, destination);
                 strcat(des->name, "/");
-                if (read_size(name->name) < fileSize) {
-                    copy_File(name->name, strcat(des->name, ep->d_name));
-                } else copyFile(name->name, strcat(des->name, ep->d_name));
+                copyFile(name->name, strcat(des->name, ep->d_name), fileSize)
             } else if (isDirectoryExists(name->name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
                 printf("To jest folder %s\n",name->name); //#FIXME jeśli folder istnieje w miejscu docelowym to poprawić żeby tego nie kopiować
                 strcpy(des->name, destination);
