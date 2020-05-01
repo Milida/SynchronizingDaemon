@@ -306,15 +306,16 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(desDir);
         } else {
-            syslog(LOG_ERR, "Coldn't open the destination directory")
+            syslog(LOG_ERR, "Coldn't open the destination directory");
             perror("Couldn't open the directory");
         }
         free(name);
         free(des);
         free(na);
         free(desti);
-        syslog(LOG_INFO, "Daemon go to sleep");
-        sleep(sleepTime);
+        syslog(LOG_INFO, "Daemon goes to sleep");
+        if ((sleep(sleepTime)) == 0)
+            syslog(LOG_INFO, "Daemon wakes up");
     }
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
