@@ -160,69 +160,59 @@ void handler(int signum){
     syslog(LOG_INFO,"Waking a deamon with a signal");
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     unsigned int sleepTime = 300;
     bool recursive = false;
     int fileSize = 30;
     //daje tutaj, najwyżej się przeniesie
     openlog("Deamon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
 
-    if(argc <= 2){ //#FIXME popraw  na getopt
+    if (argc <= 2) { //#FIXME popraw  na getopt
         printf("Too few arguments\n");
         syslog(LOG_ERR, "Too few arguments");
         exit(EXIT_FAILURE);
     }
-    if(argc == 4){
-        if(strcmp(argv[3],"-r")){
+    if (argc == 4) {
+        if (strcmp(argv[3], "-r")) {
             printf("Invalid number of arguments\n");
             syslog(LOG_ERR, "Invalid number of arguments");
             exit(EXIT_FAILURE);
-        }
-        else{
+        } else {
             recursive = true;
         }
-    }
-    else if(argc == 5){
-        if (!strcmp(argv[3],"s")){
+    } else if (argc == 5) {
+        if (!strcmp(argv[3], "s")) {
             sleepTime = atoi(argv[4]);
-        }
-        else if(!strcmp(argv[3],"d")){
+        } else if (!strcmp(argv[3], "d")) {
             fileSize = atoi(argv[4]);
-        }
-        else if(!strcmp(argv[3],"-rs")){
+        } else if (!strcmp(argv[3], "-rs")) {
             recursive = true;
             sleepTime = atoi(argv[4]);
-        }
-        else if(!strcmp(argv[3],"-rd")){
+        } else if (!strcmp(argv[3], "-rd")) {
             recursive = true;
             fileSize = atoi(argv[4]);
-        }
-        else puts("Nieprawidłowy argument");
-    }
-    else if(argc == 6){
-        if(!strcmp(argv[3],"sd")){
+        } else puts("Nieprawidłowy argument");
+    } else if (argc == 6) {
+        if (!strcmp(argv[3], "sd")) {
             sleepTime = atoi(argv[4]);
             fileSize = atoi(argv[5]);
-        }
-        else if(!strcmp(argv[3],"-rsd")){
+        } else if (!strcmp(argv[3], "-rsd")) {
             recursive = true;
             sleepTime = atoi(argv[4]);
             fileSize = atoi(argv[5]);
-        }
-        else puts("Nieprawidłowy argument");
-    }
-    else{
+        } else puts("Nieprawidłowy argument");
+    } else {
         puts("Too many arguments");
         syslog(LOG_ERR, "Too many arguments");
         exit(EXIT_FAILURE);
     }
     char *source = argv[1];
     char *destination = argv[2];
-    if (!isDirectoryExists(source)){
+    if (!isDirectoryExists(source)) {
         syslog(LOG_ERR, "Source directory doesn't exist");
         exit(EXIT_FAILURE);
     }
-    if(!isDirectoryExists(destination)) {
+    if (!isDirectoryExists(destination)) {
         syslog(LOG_ERR, "Destination directory doesn't exist");
         exit(EXIT_FAILURE);
     }
@@ -280,21 +270,22 @@ int main(int argc, char *argv[]){
                     if (read_size(name->name) < fileSize) {
                         copy_File(name->name, strcat(des->name, ep->d_name));
                     } else copyFile(name->name, strcat(des->name, ep->d_name));
-                }
-                else if(isDirectoryExists(name->name) && strcmp(ep->d_name,".") && strcmp(ep->d_name,"..") && recursive){
-                    printf("To jest folder %s\n",name->name); //#FIXME jeśli folder istnieje w miejscu docelowym to poprawić żeby tego nie kopiować
+                } else if (isDirectoryExists(name->name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") &&
+                           recursive) {
+                    printf("To jest folder %s\n",
+                           name->name); //#FIXME jeśli folder istnieje w miejscu docelowym to poprawić żeby tego nie kopiować
                     strcpy(des->name, destination);
                     strcat(des->name, "/");
                     mode_t source_chmod = read_chmod(name->name);
-                    if(mkdir(strcat(des->name, ep->d_name), source_chmod)){ //do poprawienia jeśli
-                        syslog(LOG_ERR,"Couldn't change the chmod of dir");
+                    if (mkdir(strcat(des->name, ep->d_name), source_chmod)) { //do poprawienia jeśli
+                        syslog(LOG_ERR, "Couldn't change the chmod of dir");
                         exit(EXIT_FAILURE);
                     }
                     struct utimbuf source_time;
                     source_time.modtime = read_time(name->name);
                     source_time.actime = time(NULL);
-                    if(utime(des->name, &source_time)){
-                        syslog(LOG_ERR,"Couldn't change the modification time");
+                    if (utime(des->name, &source_time)) {
+                        syslog(LOG_ERR, "Couldn't change the modification time");
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -340,4 +331,5 @@ int main(int argc, char *argv[]){
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
     closelog();
-    exit(EXIT_SUCCESS)
+    exit(EXIT_SUCCESS);
+}
