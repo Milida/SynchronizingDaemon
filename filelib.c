@@ -1,7 +1,20 @@
-#include <stdio.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
 #include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+#include <dirent.h>
+#include <string.h>
+#include <sys/sendfile.h>
 #include "filelib.h"
+#include <utime.h>
+#include <signal.h>
+#include <stdbool.h>
+#define BUFF_SIZE 64
 
 int isDirectoryExists(const char *path){ //codeforwin.org
     struct stat stats;

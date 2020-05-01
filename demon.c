@@ -129,7 +129,7 @@ int main(int argc, char *argv[]){
         DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
         struct dirent *ep;
         sourceDir = opendir(source);
-        Myal *name = (allocation *) malloc(sizeof(allocation));
+        allocation *name = (allocation *) malloc(sizeof(allocation));
         name->name = (char *) malloc(BUFF_SIZE);
         allocation *des = (allocation *) malloc(sizeof(allocation));
         des->name = (char *) malloc(BUFF_SIZE);
