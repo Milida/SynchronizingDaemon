@@ -76,6 +76,7 @@ void copy_File(char *sourceFile, char *destinationFile) {
     while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
         writeDes = write(destination, bufor, (ssize_t) readSource);
     }
+    syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
     printf("Copying %s file\n",sourceFile);
 
     close(source);
@@ -120,6 +121,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
         printf("Couldn't copy the file\n");
         syslog(LOG_ERR,"Couldn't copy the file");
     }
+    syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
 
     close(source);
     close(destination);
