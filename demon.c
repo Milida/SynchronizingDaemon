@@ -282,7 +282,7 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(sourceDir);
         } else {
-            syslog(LOG_ERR, "Coldn't open the source directory");
+            syslog(LOG_ERR, "Couldn't open the source directory");
             perror("Couldn't open the directory");
         }
 
@@ -306,7 +306,7 @@ int main(int argc, char *argv[]){
             }
             (void) closedir(desDir);
         } else {
-            syslog(LOG_ERR, "Coldn't open the destination directory");
+            syslog(LOG_ERR, "Couldn't open the destination directory");
             perror("Couldn't open the directory");
         }
         free(name);
