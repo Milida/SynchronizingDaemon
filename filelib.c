@@ -1,7 +1,7 @@
 #include "filelib.h"
 
 void handler(int signum){
-    syslog(LOG_INFO,"Waking a deamon with a signal");
+    syslog(LOG_INFO,"Waking a daemon with a signal");
 }
 
 int isDirectoryExists(const char *path){ //codeforwin.org
@@ -56,7 +56,6 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     int source = open(sourceFile, O_RDONLY);
     int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
     if(destination < 0 && errno == EEXIST){
-        //printf("Plik %s już istnieje\n", sourceFile);
         if(read_time(sourceFile) == read_time(destinationFile)) return;
     }
     destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
@@ -71,14 +70,10 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
         }
     }
     else {
-        //printf("Copying %s file\n",sourceFile);
         if (fstat(source, &stbuf) == -1) {
-            // printf("Fstat errno %d\n",errno);
             syslog(LOG_ERR, "Couldn't copy the file");
         }
         if (sendfile(destination, source, 0, stbuf.st_size) == -1) {
-            //printf("%d\n",errno);
-            // printf("Couldn't copy the file\n");
             syslog(LOG_ERR, "Couldn't copy the file");
         }
     }
@@ -146,23 +141,15 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize){
     if (sourceDir != NULL) {
         while (ep = readdir(sourceDir)) {
             name = catDir(name, source, ep->d_name);
-            //strcpy(name->name, source);
-            //strcat(name->name, "/");
             if (isFileExists(name)) {
                 puts(destination);
                 des = catDir(des, destination,ep->d_name);
-                //strcpy(des->name, destination);
-                //strcat(des->name, "/");
                 copyFile(name, des, fileSize);
                 //free(des);
             } else if (isDirectoryExists(name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
                 des = catDir(des, destination, ep->d_name);
-                //strcpy(des->name, destination);
-                //strcat(des->name, "/");
                 copyDir(name, des, recursive, fileSize);
-                //free(des);
             }
-            //free(name);
         }
         (void) closedir(sourceDir);
     } else {
@@ -187,9 +174,7 @@ void deleteFromDir(char *source, char *destination){
             if (isFileExists(na)) {
                 desti = catDir(desti,source, epp->d_name);
                 deleteFile(na, desti);
-                //free(desti);
             }
-            //free(na);
         }
         (void) closedir(desDir);
     } else {
