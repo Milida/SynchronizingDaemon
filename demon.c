@@ -123,9 +123,9 @@ int main(int argc, char *argv[]) {
         DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
         struct dirent *ep;
         sourceDir = opendir(source);
-        MyExample *name = (MyExample *) malloc(sizeof(MyExample));
+        allocation *name = (allocation *) malloc(sizeof(allocation));
         name->name = (char *) malloc(BUFF_SIZE);
-        MyExample *des = (MyExample *) malloc(sizeof(MyExample));
+        allocation *des = (allocation *) malloc(sizeof(allocation));
         des->name = (char *) malloc(BUFF_SIZE);
         //strcpy(name, source);
         //strcat(name,"/");
@@ -168,9 +168,9 @@ int main(int argc, char *argv[]) {
         DIR *desDir;
         struct dirent *epp;
         desDir = opendir(destination);
-        MyExample *na = (MyExample *) malloc(sizeof(MyExample));
+        allocation *na = (allocation *) malloc(sizeof(allocation));
         na->name = (char *) malloc(BUFF_SIZE);
-        MyExample *desti = (MyExample *) malloc(sizeof(MyExample));
+        allocation *desti = (allocation *) malloc(sizeof(allocation));
         desti->name = (char *) malloc(BUFF_SIZE);
 
         if (desDir != NULL) {

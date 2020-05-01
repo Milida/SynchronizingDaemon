@@ -1,5 +1,6 @@
 #ifndef filelib
 #define filelib
+#include <sys/types.h>
 
 int isDirectoryExists(const char *path);
 int isFileExists(const char *path);
