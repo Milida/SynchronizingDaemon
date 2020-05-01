@@ -1,7 +1,5 @@
 #include "filelib.h"
 
-void demonCp (char *source, char *destination, bool recursive, int fileSize);
-
 void handler(int signum){
     syslog(LOG_INFO,"Waking a deamon with a signal");
 }
