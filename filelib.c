@@ -1,5 +1,7 @@
 #include "filelib.h"
 
+void demonCp (char *source, char *destination, bool recursive, int fileSize);
+
 void handler(int signum){
     syslog(LOG_INFO,"Waking a deamon with a signal");
 }
@@ -49,7 +51,7 @@ off_t read_size(char *source){
     }
 }
 
-void copyFile(char *sourceFile, char *destinationFile) {
+void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     char bufor[4096]; //małe
     int readSource, writeDes; //małe
     struct stat stbuf;
@@ -61,7 +63,7 @@ void copyFile(char *sourceFile, char *destinationFile) {
     }
     destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     if ((source < 0 || destination < 0) && errno != EEXIST) {
-       // printf("Couldn't open the file");
+        printf("Couldn't open the file %d\n",errno);
         syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
@@ -118,71 +120,92 @@ void deleteFile(char *destinationFile, char *sourceFile) {
     close(destination);
 }
 
-void demonCp (static char *source, static char *destination, bool recursive, int fileSize){
+void copyDir(char *source, char *destination, bool recursive, int fileSize){
+    mode_t source_chmod = read_chmod(source);
+    if (mkdir(destination, source_chmod)) { //do poprawienia jeśli
+        if(errno != EEXIST){
+            printf("%d\n",errno);
+            syslog(LOG_ERR, "Couldn't change the chmod of dir");
+            exit(EXIT_FAILURE);
+        }
+    }
+    demonCp(source, destination, recursive, fileSize);
+    struct utimbuf source_time;
+    source_time.modtime = read_time(source);
+    source_time.actime = time(NULL);
+    if (utime(destination, &source_time)) {
+        syslog(LOG_ERR, "Couldn't change the modification time");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void demonCp (char *source, char *destination, bool recursive, int fileSize){
     DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
     sourceDir = opendir(source);
-    allocation *name = (allocation *) malloc(sizeof(allocation));
-    name->name = (char *) malloc(BUFF_SIZE);
-    allocation *des = (allocation *) malloc(sizeof(allocation));
-    des->name = (char *) malloc(BUFF_SIZE);
+    char *name = (char*)malloc(sizeof(char));
+    char *des = (char *)malloc(sizeof(char));
     if (sourceDir != NULL) {
         while (ep = readdir(sourceDir)) {
-            strcpy(name->name, source);
-            strcat(name->name, "/");
-            if (isFileExists(strcat(name->name, ep->d_name))) {
-                strcpy(des->name, destination);
-                strcat(des->name, "/");
-                copyFile(name->name, strcat(des->name, ep->d_name), fileSize)
-            } else if (isDirectoryExists(name->name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
-                printf("To jest folder %s\n",name->name); //#FIXME jeśli folder istnieje w miejscu docelowym to poprawić żeby tego nie kopiować
-                strcpy(des->name, destination);
-                strcat(des->name, "/");
-                mode_t source_chmod = read_chmod(name->name);
-                if (mkdir(strcat(des->name, ep->d_name), source_chmod)) { //do poprawienia jeśli
-                    syslog(LOG_ERR, "Couldn't change the chmod of dir");
-                    exit(EXIT_FAILURE);
-                }
-                struct utimbuf source_time;
-                source_time.modtime = read_time(name->name);
-                source_time.actime = time(NULL);
-                if (utime(des->name, &source_time)) {
-                    syslog(LOG_ERR, "Couldn't change the modification time");
-                    exit(EXIT_FAILURE);
-                }
+            name = catDir(name, source, ep->d_name);
+            //strcpy(name->name, source);
+            //strcat(name->name, "/");
+            if (isFileExists(name)) {
+                puts(destination);
+                des = catDir(des, destination,ep->d_name);
+                //strcpy(des->name, destination);
+                //strcat(des->name, "/");
+                copyFile(name, des, fileSize);
+                //free(des);
+            } else if (isDirectoryExists(name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
+                des = catDir(des, destination, ep->d_name);
+                //strcpy(des->name, destination);
+                //strcat(des->name, "/");
+                copyDir(name, des, recursive, fileSize);
+                //free(des);
             }
+            //free(name);
         }
         (void) closedir(sourceDir);
     } else {
         syslog(LOG_ERR, "Couldn't open the source directory");
         perror("Couldn't open the directory");
     }
+    deleteFromDir(source, destination);
+    free(name);
+    free(des);
+}
 
+void deleteFromDir(char *source, char *destination){
     DIR *desDir;
     struct dirent *epp;
     desDir = opendir(destination);
-    allocation *na = (allocation *) malloc(sizeof(allocation));
-    na->name = (char *) malloc(BUFF_SIZE);
-    allocation *desti = (allocation *) malloc(sizeof(allocation));
-    desti->name = (char *) malloc(BUFF_SIZE);
+    char *na = (char *)malloc(sizeof(char));
+    char *desti = (char *)malloc(sizeof(char));
 
     if (desDir != NULL) {
         while (epp = readdir(desDir)) {
-            strcpy(na->name, destination);
-            strcat(na->name, "/");
-            if (isFileExists(strcat(na->name, epp->d_name))) {
-                strcpy(desti->name, source);
-                strcat(desti->name, "/");
-                deleteFile(na->name, strcat(desti->name, epp->d_name));
+            na = catDir(na,destination,epp->d_name);
+            if (isFileExists(na)) {
+                desti = catDir(desti,source, epp->d_name);
+                deleteFile(na, desti);
+                //free(desti);
             }
+            //free(na);
         }
         (void) closedir(desDir);
     } else {
         syslog(LOG_ERR, "Couldn't open the destination directory");
         perror("Couldn't open the directory");
     }
-    free(name);
-    free(des);
     free(na);
     free(desti);
+}
+
+char *catDir(char* newptr, char *first, char *second){
+    newptr = realloc(newptr,strlen(first)+strlen(second)+2);
+    strcpy(newptr,first);
+    strcat(newptr,"/");
+    strcat(newptr,second);
+    return newptr;
 }

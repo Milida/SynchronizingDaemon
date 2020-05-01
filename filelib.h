@@ -15,7 +15,7 @@
 #include <utime.h>
 #include <signal.h>
 #include <stdbool.h>
-#define BUFF_SIZE 64
+#define BUFF_SIZE 100
 
 typedef struct al {
     char *name;
@@ -27,8 +27,11 @@ int isFileExists(const char *path);
 mode_t read_chmod(char *source);
 time_t read_time(char *source);
 off_t read_size(char *source);
-void copyFile(char *sourceFile, char *destinationFile);
+void copyFile(char *sourceFile, char *destinationFile, int fileSize);
 void deleteFile(char *destinationFile, char *sourceFile);
-void demonCp (static char *source, static char *destination, bool recursive, int fileSize);
+void copyDir(char *source, char *destination, bool recursive, int fileSize);
+void demonCp(char *source, char *destination, bool recursive, int fileSize);
+void deleteFromDir(char *source, char *destination);
+char *catDir(char *newptr,char *first, char *second);
 
 #endif //filelib
