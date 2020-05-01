@@ -281,8 +281,22 @@ int main(int argc, char *argv[]){
                         copy_File(name->name, strcat(des->name, ep->d_name));
                     } else copyFile(name->name, strcat(des->name, ep->d_name));
                 }
-                else if(isDirectoryExists(strcat(name->name, ep->d_name)) && !strcmp(ep->d_name,".") && !strcmp(ep->d_name,"..") && recursive == true){
-                    puts("To jest folder %s\n",sp->d_name);
+                else if(isDirectoryExists(name->name) && strcmp(ep->d_name,".") && strcmp(ep->d_name,"..") && recursive){
+                    printf("To jest folder %s\n",name->name); //#FIXME jeśli folder istnieje w miejscu docelowym to poprawić żeby tego nie kopiować
+                    strcpy(des->name, destination);
+                    strcat(des->name, "/");
+                    mode_t source_chmod = read_chmod(name->name);
+                    if(mkdir(strcat(des->name, ep->d_name), source_chmod)){ //do poprawienia jeśli
+                        syslog(LOG_ERR,"Couldn't change the chmod of dir");
+                        exit(EXIT_FAILURE);
+                    }
+                    struct utimbuf source_time;
+                    source_time.modtime = read_time(name->name);
+                    source_time.actime = time(NULL);
+                    if(utime(des->name, &source_time)){
+                        syslog(LOG_ERR,"Couldn't change the modification time");
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
             (void) closedir(sourceDir);
@@ -326,5 +340,4 @@ int main(int argc, char *argv[]){
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
     closelog();
-    exit(EXIT_SUCCESS);
-}
+    exit(EXIT_SUCCESS)
