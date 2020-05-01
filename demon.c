@@ -281,7 +281,7 @@ int main(int argc, char *argv[]){
                         copy_File(name->name, strcat(des->name, ep->d_name));
                     } else copyFile(name->name, strcat(des->name, ep->d_name));
                 }
-                else if(isDirectoryExists(strcat(name-1.name, ep->d_name)) && !strcmp(ep->d_name,".") && !strcmp(ep->d_name,"..") && recursive == true){
+                else if(isDirectoryExists(strcat(name->name, ep->d_name)) && !strcmp(ep->d_name,".") && !strcmp(ep->d_name,"..") && recursive == true){
                     puts("To jest folder %s\n",sp->d_name);
                 }
             }
