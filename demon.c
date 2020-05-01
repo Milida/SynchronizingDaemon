@@ -165,7 +165,7 @@ int main(int argc, char *argv[]){
     //daje tutaj, najwyżej się przeniesie
     openlog("Deamon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
 
-    if(argc <= 2){ #FIXME getopt
+    if(argc <= 2){ //#FIXME popraw  na getopt
         printf("Too few arguments\n");
         syslog(LOG_ERR, "Too few arguments");
         exit(EXIT_FAILURE);
