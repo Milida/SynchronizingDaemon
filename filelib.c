@@ -13,7 +13,6 @@
 #include "filelib.h"
 #include <utime.h>
 #include <signal.h>
-#include <stdbool.h>
 #define BUFF_SIZE 64
 
 int isDirectoryExists(const char *path){ //codeforwin.org
