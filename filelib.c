@@ -1,7 +1,7 @@
 #include "filelib.h"
 
-void handler(int signum){
-    syslog(LOG_INFO,"Waking a deamon with a signal");
+sighandler_t handler(int signum){
+    syslog(LOG_INFO,"Waking a daemon with a signal");
 }
 
 int dirExists(const char *path) {
@@ -18,6 +18,7 @@ int fileExists(const char *path) {
         return S_ISREG(stats.st_mode);
     return 0;
 }
+
 mode_t read_chmod(char *source) {
     struct stat mode;
     if(stat(source, &mode) != -1)
@@ -49,9 +50,6 @@ off_t read_size(char *source) {
 }
 
 void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
-    char bufor[4096]; //małe
-    int readSource, writeDes; //małe
-    struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
     int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
     if(destination < 0 && errno == EEXIST)
@@ -62,13 +60,17 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
         syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-    if (read_size(sourceFile) < fileSize)
-        while ((readSource = read(source, bufor, sizeof(bufor))) > 0)
-            writeDes = write(destination, bufor, (ssize_t) readSource);
+    if (read_size(sourceFile) < fileSize) {
+        char buff[4096]; //małe
+        int readSource, writeDes; //małe
+        while ((readSource = read(source, buff, sizeof(bufor))) > 0)
+            writeDes = write(destination, buff, (ssize_t) readSource);
+    }
     else {
+        struct stat stbuf;//duże
         if (fstat(source, &stbuf) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
-        if (sendfile(destination, source, 0, stbuf.st_size) == -1)
+        else if (sendfile(destination, source, 0, stbuf.st_size) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
     }
     syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
@@ -110,7 +112,7 @@ void copyDir(char *source, char *destination, bool recursive, int fileSize) {
 }
 
 void demonCp (char *source, char *destination, bool recursive, int fileSize) {
-    DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
+    DIR *sourceDir;
     struct dirent *ep;
     sourceDir = opendir(source);
     char *name = (char *)malloc(sizeof(char));
