@@ -14,9 +14,8 @@ int isDirectoryExists(const char *path){ //codeforwin.org
 int isFileExists(const char *path){
     struct stat stats;
     stat(path, &stats);
-    if(stat(path,&stats) != -1){
+    if(stat(path,&stats) != -1)
         return S_ISREG(stats.st_mode);
-    }
     return 0;
 }
 mode_t read_chmod(char *source){
@@ -55,26 +54,22 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     struct stat stbuf;
     int source = open(sourceFile, O_RDONLY);
     int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
-    if(destination < 0 && errno == EEXIST){
-        if(read_time(sourceFile) == read_time(destinationFile)) return;
-    }
+    if(destination < 0 && errno == EEXIST)
+        if(read_time(sourceFile) == read_time(destinationFile)) 
+            return;
     destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     if ((source < 0 || destination < 0) && errno != EEXIST) {
         syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-    if (read_size(sourceFile) < fileSize) {
-        while ((readSource = read(source, bufor, sizeof(bufor))) > 0){
+    if (read_size(sourceFile) < fileSize)
+        while ((readSource = read(source, bufor, sizeof(bufor))) > 0)
             writeDes = write(destination, bufor, (ssize_t) readSource);
-        }
-    }
     else {
-        if (fstat(source, &stbuf) == -1) {
+        if (fstat(source, &stbuf) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
-        }
-        if (sendfile(destination, source, 0, stbuf.st_size) == -1) {
+        if (sendfile(destination, source, 0, stbuf.st_size) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
-        }
     }
     syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
 
@@ -96,18 +91,10 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     }
 }
 
-void deleteFile(char *sourceFile, char *destinationFile) {
-    if(isFileExists(destinationFile) && !isFileExists(sourceFile)){
-        if(remove(destinationFile)==0){
-            syslog(LOG_INFO,"File deleted successfully %s", destinationFile);
-        }
-    }
-}
-
-void copyDir(char *source, char *destination, bool recursive, int fileSize){
+void copyDir(char *source, char *destination, bool recursive, int fileSize) {
     mode_t source_chmod = read_chmod(source);
-    if (mkdir(destination, source_chmod)) { //do poprawienia jeśli
-        if(errno != EEXIST){
+    if (mkdir(destination, source_chmod)) {
+        if (errno != EEXIST) {
             syslog(LOG_ERR, "Couldn't change the chmod of dir");
             exit(EXIT_FAILURE);
         }
@@ -122,7 +109,7 @@ void copyDir(char *source, char *destination, bool recursive, int fileSize){
     }
 }
 
-void demonCp (char *source, char *destination, bool recursive, int fileSize){
+void demonCp (char *source, char *destination, bool recursive, int fileSize) {
     DIR *sourceDir; //https://www.gnu.org/software/libc/manual/html_node/Simple-Directory-Lister.html#Simple-Directory-Lister
     struct dirent *ep;
     sourceDir = opendir(source);
@@ -149,25 +136,25 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize){
     free(des);
 }
 
-void deleteFromDir(char *source, char *destination, bool recursive){
+void deleteFromDir(char *source, char *destination, bool recursive) {
     DIR *desDir;
     struct dirent *epp;
     desDir = opendir(destination);
     char *src = (char *)malloc(sizeof(char));
-    char *desti = (char *)malloc(sizeof(char));
+    char *dst= (char *)malloc(sizeof(char));
 
     if (desDir != NULL) {
         while (epp = readdir(desDir)) {
-            desti = catDir(desti,destination,epp->d_name);
+            dst = catDir(dst,destination,epp->d_name);
             src = catDir(src,source, epp->d_name);
-            if (isFileExists(desti)) {
-                deleteFile(src, desti);
+            if (isFileExists(dst) && !isFileExists(src)) {
+                if(remove(destinationFile)==0)
+                    syslog(LOG_INFO,"File deleted successfully %s", destinationFile);
             }
-            else if(recursive && (isDirectoryExists(desti) && !isDirectoryExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
-                deleteFromDir(src, desti, recursive);
-                if(!rmdir(desti)){
-                    syslog(LOG_INFO,"Directory deleted successfully %s",desti);
-                }
+            else if(recursive && (isDirectoryExists(dst) && !isDirectoryExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
+                deleteFromDir(src, dst, recursive);
+                if(!rmdir(dst))
+                    syslog(LOG_INFO,"Directory deleted successfully %s",dst);
             }
         }
         (void) closedir(desDir);
@@ -176,10 +163,10 @@ void deleteFromDir(char *source, char *destination, bool recursive){
         perror("Couldn't open the directory");
     }
     free(src);
-    free(desti);
+    free(dst);
 }
 
-char *catDir(char* newptr, char *first, char *second){
+char *catDir(char* newptr, char *first, char *second) {
     newptr = realloc(newptr,strlen(first)+strlen(second)+2);
     strcpy(newptr,first);
     strcat(newptr,"/");

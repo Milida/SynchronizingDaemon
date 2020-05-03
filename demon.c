@@ -20,9 +20,14 @@ int main(int argc, char *argv[]) {
     }
     if(argc <= 2){
         puts("Too few arguments");
-        syslog(LOG_ERR,"Too few arguments")
+        syslog(LOG_ERR,"Too few arguments");
     }
-    while((choice = getopt(argc,argv,"rs:d:")) != -1){ //checking and setting options from user's choice
+    if(argc > 8){
+        puts("Too many arguments");
+        syslog(LOG_ERR, "Too many arguments");
+        exit(EXIT_FAILURE);
+    }
+    while((choice = getopt(argc,argv,":rs:d:")) != -1){ //checking and setting options from user's choice
         switch(choice){
             case 'r':
                 recursive = true;
@@ -34,17 +39,14 @@ int main(int argc, char *argv[]) {
                 fileSize = atoi(optarg);
                 break;
             case ':':
-                printf("Option -%c requires an operand\n",optarg);
+                puts("Missing an operand");
+                syslog(LOG_ERR, "Missong an operand");
+                exit(EXIT_FAILURE);
             default:
                 puts("No such option");
                 syslog(LOG_ERR, "No such option");
                 exit(EXIT_FAILURE);
         }
-    }
-    if(optind >= argc){
-        puts("Missing an argument after options");
-        syslog(LOG_ERR, "Missing");
-        exit(EXIT_FAILURE);
     }
 
     /* Our process ID and Session ID */
@@ -68,19 +70,16 @@ int main(int argc, char *argv[]) {
     sid = setsid();
     if (sid < 0) {
         syslog(LOG_ERR, "Incorrect SessionID");
-        /* Log the failure */
         exit(EXIT_FAILURE);
     }
     /* Change the current working directory */
     if ((chdir("/")) < 0) {
         syslog(LOG_ERR, "Couldn't change the current working directory");
-        /* Log the failure */
         exit(EXIT_FAILURE);
     }
 
     /* Daemon-specific initialization goes here */
     signal(SIGUSR1, handler);
-    /* The Big Loop */
     while (1) {
         demonCp(source, destination, recursive, fileSize);
         syslog(LOG_INFO, "Daemon goes to sleep");

@@ -28,7 +28,6 @@ mode_t read_chmod(char *source);
 time_t read_time(char *source);
 off_t read_size(char *source);
 void copyFile(char *sourceFile, char *destinationFile, int fileSize);
-void deleteFile(char *destinationFile, char *sourceFile);
 void copyDir(char *source, char *destination, bool recursive, int fileSize);
 void demonCp(char *source, char *destination, bool recursive, int fileSize);
 void deleteFromDir(char *source, char *destination, bool recursive);
