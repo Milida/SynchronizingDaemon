@@ -1,25 +1,28 @@
 #include "filelib.h"
 
 int main(int argc, char *argv[]) {
-    unsigned int sleepTime = 300;
+    unsigned int sleepTime = 300; //setting default options
     bool recursive = false;
-    int fileSize = 30;
+    int fileSize = 50;
     int choice;
     char *source = argv[1];
     char *destination = argv[2];
-    if (!isDirectoryExists(source)) {
+    openlog("Daemon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
+    if (!isDirectoryExists(source)) { //checking the source path
         puts("Source directory doesn't exist");
         syslog(LOG_ERR, "Source directory doesn't exist");
         exit(EXIT_FAILURE);
     }
-    if (!isDirectoryExists(destination)) {
+    if (!isDirectoryExists(destination)) { //checking the destination path
         puts("Destination directory doesn't exist");
         syslog(LOG_ERR, "Destination directory doesn't exist");
         exit(EXIT_FAILURE);
     }
-    //daje tutaj, najwyżej się przeniesie
-    openlog("Deamon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
-    while((choice = getopt(argc,argv,"rs:d:"))!=-1){
+    if(argc <= 2){
+        puts("Too few arguments");
+        syslog(LOG_ERR,"Too few arguments")
+    }
+    while((choice = getopt(argc,argv,"rs:d:")) != -1){ //checking and setting options from user's choice
         switch(choice){
             case 'r':
                 recursive = true;
@@ -30,6 +33,8 @@ int main(int argc, char *argv[]) {
             case 'd':
                 fileSize = atoi(optarg);
                 break;
+            case ':':
+                printf("Option -%c requires an operand\n",optarg);
             default:
                 puts("No such option");
                 syslog(LOG_ERR, "No such option");
