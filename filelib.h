@@ -22,8 +22,8 @@ typedef struct al {
 } allocation;
 
 void handler(int signum);
-int isDirectoryExists(const char *path);
-int isFileExists(const char *path);
+int dirExists(const char *path);
+int fileExists(const char *path);
 mode_t read_chmod(char *source);
 time_t read_time(char *source);
 off_t read_size(char *source);

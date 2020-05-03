@@ -8,12 +8,12 @@ int main(int argc, char *argv[]) {
     char *source = argv[1];
     char *destination = argv[2];
     openlog("Daemon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
-    if (!isDirectoryExists(source)) { //checking the source path
+    if (!dirExists(source)) { //checking the source path
         puts("Source directory doesn't exist");
         syslog(LOG_ERR, "Source directory doesn't exist");
         exit(EXIT_FAILURE);
     }
-    if (!isDirectoryExists(destination)) { //checking the destination path
+    if (!dirExists(destination)) { //checking the destination path
         puts("Destination directory doesn't exist");
         syslog(LOG_ERR, "Destination directory doesn't exist");
         exit(EXIT_FAILURE);

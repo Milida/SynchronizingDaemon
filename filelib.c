@@ -4,21 +4,21 @@ void handler(int signum){
     syslog(LOG_INFO,"Waking a deamon with a signal");
 }
 
-int isDirectoryExists(const char *path){ //codeforwin.org
+int dirExists(const char *path) {
     struct stat stats;
     if(stat(path, &stats) != -1)
         return S_ISDIR(stats.st_mode);
     return 0;
 }
 
-int isFileExists(const char *path){
+int fileExists(const char *path) {
     struct stat stats;
     stat(path, &stats);
     if(stat(path,&stats) != -1)
         return S_ISREG(stats.st_mode);
     return 0;
 }
-mode_t read_chmod(char *source){
+mode_t read_chmod(char *source) {
     struct stat mode;
     if(stat(source, &mode) != -1)
         return mode.st_mode;
@@ -28,7 +28,7 @@ mode_t read_chmod(char *source){
     }
 }
 
-time_t read_time(char *source){
+time_t read_time(char *source) {
     struct stat time;
     if(stat(source,&time) != -1)
         return time.st_mtime;
@@ -38,7 +38,7 @@ time_t read_time(char *source){
     }
 }
 
-off_t read_size(char *source){
+off_t read_size(char *source) {
     struct stat size;
     if(stat(source, &size) != -1)
         return size.st_size;
@@ -148,8 +148,8 @@ void deleteFromDir(char *source, char *destination, bool recursive) {
             dst = catDir(dst,destination,epp->d_name);
             src = catDir(src,source, epp->d_name);
             if (isFileExists(dst) && !isFileExists(src)) {
-                if(remove(destinationFile)==0)
-                    syslog(LOG_INFO,"File deleted successfully %s", destinationFile);
+                if(remove(dst)==0)
+                    syslog(LOG_INFO,"File deleted successfully %s", dst);
             }
             else if(recursive && (isDirectoryExists(dst) && !isDirectoryExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
                 deleteFromDir(src, dst, recursive);
