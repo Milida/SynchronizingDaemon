@@ -120,10 +120,10 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize) {
     if (sourceDir != NULL) {
         while (ep = readdir(sourceDir)) {
             name = catDir(name, source, ep->d_name);
-            if (isFileExists(name)) {
+            if (fileExists(name)) {
                 des = catDir(des, destination,ep->d_name);
                 copyFile(name, des, fileSize);
-            } else if (isDirectoryExists(name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
+            } else if (dirExists(name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
                 des = catDir(des, destination, ep->d_name);
                 copyDir(name, des, recursive, fileSize);
             }
@@ -149,11 +149,11 @@ void deleteFromDir(char *source, char *destination, bool recursive) {
         while (epp = readdir(desDir)) {
             dst = catDir(dst,destination,epp->d_name);
             src = catDir(src,source, epp->d_name);
-            if (isFileExists(dst) && !isFileExists(src)) {
+            if (fileExists(dst) && !fileExists(src)) {
                 if(remove(dst)==0)
                     syslog(LOG_INFO,"File deleted successfully %s", dst);
             }
-            else if(recursive && (isDirectoryExists(dst) && !isDirectoryExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
+            else if(recursive && (dirExists(dst) && !dirExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
                 deleteFromDir(src, dst, recursive);
                 if(!rmdir(dst))
                     syslog(LOG_INFO,"Directory deleted successfully %s",dst);
