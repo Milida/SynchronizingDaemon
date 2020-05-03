@@ -1,6 +1,6 @@
 #include "filelib.h"
 
-sighandler_t handler(int signum){
+void handler(int signum){
     syslog(LOG_INFO,"Waking a daemon with a signal");
 }
 
@@ -63,7 +63,7 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     if (read_size(sourceFile) < fileSize) {
         char buff[4096]; //małe
         int readSource, writeDes; //małe
-        while ((readSource = read(source, buff, sizeof(bufor))) > 0)
+        while ((readSource = read(source, buff, sizeof(buff))) > 0)
             writeDes = write(destination, buff, (ssize_t) readSource);
     }
     else {
