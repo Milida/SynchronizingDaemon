@@ -65,9 +65,9 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {//copying 
     }
     if (read_size(sourceFile) < fileSize) {//copying small files with read/write
         char buffer[4096];
-        int readSource, writeDes;
+        int readSource;
         while ((readSource = read(source, buffer, sizeof(buffer))) > 0)
-            writeDes = write(destination, buffer, (ssize_t) readSource);
+            write(destination, buffer, (ssize_t) readSource);
     }
     else {//copying big files with sendfile
         struct stat statbuff;
