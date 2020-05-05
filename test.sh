@@ -1,4 +1,6 @@
 #!/bin/bash
+gcc demon.c filelib.c filelib.h -o Demon
+
 mkdir -p ~/folder1/qwe/nowyFolder/nowy
 mkdir -p ~/folder1/qwe/kolejnyFolder
 mkdir -p ~/folder1/qwe/folderX
@@ -20,3 +22,7 @@ touch ~/folder2/aa/123/so
 echo "Jeszcze inny plik" > ~/folder2/aa/123/so
 
 echo "Utworzono środowisko testowe - foldery ~/folder1 i ~/folder2"
+
+./Demon ~/folder1 ~/folder2 -r -s 20
+
+echo "Uruchomiono demona synchronizującego rekurencyjnie, budzącego się co 20 s"
