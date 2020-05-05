@@ -1,9 +1,9 @@
 #include "filelib.h"
 
 int main(int argc, char *argv[]) {
-    unsigned int sleepTime = 300; //setting default options
-    bool recursive = false;
-    int fileSize = 1024;
+    unsigned int sleepTime = 300; //setting default sleep time
+    bool recursive = false; //implicitly it doesn't synchronize recursively
+    int fileSize = 1024; //deafult split size to divide copying method
     int choice;
     char *source = argv[1];
     char *destination = argv[2];
@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     if(argc <= 2){
         puts("Too few arguments");
         syslog(LOG_ERR,"Too few arguments");
+        exit(EXIT_FAILURE);
     }
     if(argc > 8){
         puts("Too many arguments");
@@ -33,10 +34,21 @@ int main(int argc, char *argv[]) {
                 recursive = true;
                 break;
             case 's':
-                sleepTime = atoi(optarg);
+                if(atoi(optarg) <= 0){
+                    puts("Invalid sleepTime operand");
+                    syslog(LOG_ERR, "Invalid sleepTime argument");
+                    exit(EXIT_FAILURE);
+                }
+                else
+                    sleepTime = atoi(optarg);
                 break;
             case 'd':
                 fileSize = atoi(optarg);
+                if(fileSize <= 0){
+                    puts("Invalid fileSize operand");
+                    syslog(LOG_ERR, "Invalid fileSize operand");
+                    exit(EXIT_FAILURE);
+                }
                 break;
             case ':':
                 puts("Missing an operand");
@@ -72,7 +84,7 @@ int main(int argc, char *argv[]) {
     }
 
     signal(SIGUSR1, handler);
-    while (1) { //TODO jeśli demon zostanie obudzony sygnałem w trakcie swojego działania to niech działa dalej, jeśli poza to niech wtedy się budzi
+    while (1) {
         demonCp(source, destination, recursive, fileSize);
         syslog(LOG_INFO, "Daemon goes to sleep");
         if ((sleep(sleepTime)) == 0)
