@@ -1,4 +1,4 @@
-complie:
+compile:
     gcc demon.c filelib.c filelib.h -o Demon
 
 test:
