@@ -51,14 +51,12 @@ off_t read_size(char *source) {//reading size
 
 void copyFile(char *sourceFile, char *destinationFile, int fileSize) {//copying file
     int source = open(sourceFile, O_RDONLY);
-    int destination;
-    if(fileExists(destinationFile)){ //file already exists
-        destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
-        if(read_time(sourceFile) == read_time(destinationFile)) //if timestamps are equal we don't have to copy
+    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
+    if(destination < 0 && errno == EEXIST){
+        if(read_time(sourceFile) == read_time(destinationFile))
             return;
+        destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
     }
-    else
-        destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);//creating and opening file
     if (source < 0 || destination < 0) {
         syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
