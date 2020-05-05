@@ -86,7 +86,8 @@ int main(int argc, char *argv[]) {
     }
 
     if(sigaction(SIGUSR1, &sa, NULL) == -1)
-        puts("Signal handling error\n");
+        syslog(LOG_INFO, "Signal handling error");
+
     while (1) {
         demonCp(source, destination, recursive, fileSize); //daemon synchronizing function
         syslog(LOG_INFO, "Daemon goes to sleep");
