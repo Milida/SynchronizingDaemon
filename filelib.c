@@ -96,7 +96,7 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {//copying 
     }
 }
 
-void copyDir(char *source, char *destination, bool recursive, int fileSize) {//copying directory and its contents
+void copyDir(char *source, char *destination, int fileSize) {//copying directory and its contents
     mode_t source_chmod = read_chmod(source);
     if (mkdir(destination, source_chmod)) {
         if (errno != EEXIST) {
@@ -104,7 +104,7 @@ void copyDir(char *source, char *destination, bool recursive, int fileSize) {//c
             exit(EXIT_FAILURE);
         }
     }
-    demonCp(source, destination, recursive, fileSize);//copying contents of directory
+    demonCp(source, destination, 1, fileSize);//copying contents of directory
     struct utimbuf source_time;
     source_time.modtime = read_time(source);
     source_time.actime = time(NULL);
@@ -114,21 +114,21 @@ void copyDir(char *source, char *destination, bool recursive, int fileSize) {//c
     }
 }
 
-void demonCp (char *source, char *destination, bool recursive, int fileSize) {
+void demonCp (char *source, char *destination, bool recursive, int fileSize) {//synchronizing two directories
     DIR *sourceDir;
-    struct dirent *ep;
+    struct dirent *dir;
     sourceDir = opendir(source);
-    char *name = (char *)malloc(sizeof(char));
+    char *src = (char *)malloc(sizeof(char));
     char *des = (char *)malloc(sizeof(char));
     if (sourceDir != NULL) {
-        while (ep = readdir(sourceDir)) {
-            name = catDir(name, source, ep->d_name);
-            if (fileExists(name)) {
-                des = catDir(des, destination,ep->d_name);
-                copyFile(name, des, fileSize);
-            } else if (dirExists(name) && strcmp(ep->d_name, ".") && strcmp(ep->d_name, "..") && recursive) {
-                des = catDir(des, destination, ep->d_name);
-                copyDir(name, des, recursive, fileSize);
+        while (dir = readdir(sourceDir)) {
+            src = catDir(src, source, dir->d_name);
+            if (fileExists(src))
+                des = catDir(des, destination,dir->d_name);
+                copyFile(src, des, fileSize);//copying regular file
+            } else if (dirExists(src) && strcmp(dir->d_name, ".") && strcmp(dir->d_name, "..") && recursive) {
+                des = catDir(des, destination, dir->d_name);
+                copyDir(src, des, fileSize);//copying directory with contents
             }
         }
         (void) closedir(sourceDir);
@@ -136,27 +136,26 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize) {
         syslog(LOG_ERR, "Couldn't open the source directory");
         perror("Couldn't open the directory");
     }
-    deleteFromDir(source, destination, recursive);
-    free(name);
+    deleteFromDir(source, destination, recursive);//deleting unnecessary files from destination directory
+    free(src);
     free(des);
 }
 
-void deleteFromDir(char *source, char *destination, bool recursive) {
+void deleteFromDir(char *source, char *destination, bool recursive) {//deleting unnecessary files from destination directory
     DIR *desDir;
-    struct dirent *epp;
+    struct dirent *dir;
     desDir = opendir(destination);
     char *src = (char *)malloc(sizeof(char));
     char *dst= (char *)malloc(sizeof(char));
-
     if (desDir != NULL) {
-        while (epp = readdir(desDir)) {
-            dst = catDir(dst,destination,epp->d_name);
-            src = catDir(src,source, epp->d_name);
+        while (dir = readdir(desDir)) {
+            dst = catDir(dst,destination,dir->d_name);
+            src = catDir(src,source, dir->d_name);
             if (fileExists(dst) && !fileExists(src)) {
                 if(remove(dst)==0)
                     syslog(LOG_INFO,"File deleted successfully %s", dst);
             }
-            else if(recursive && (dirExists(dst) && !dirExists(src)) && strcmp(epp->d_name,".") && strcmp(epp->d_name,"..")){
+            else if(recursive && dirExists(dst) && !dirExists(src) && strcmp(dir->d_name,".") && strcmp(dir->d_name,"..")){
                 deleteFromDir(src, dst, recursive);
                 if(!rmdir(dst))
                     syslog(LOG_INFO,"Directory deleted successfully %s",dst);
@@ -171,7 +170,7 @@ void deleteFromDir(char *source, char *destination, bool recursive) {
     free(dst);
 }
 
-char *catDir(char* ptr, char *path, char *name) {
+char *catDir(char* ptr, char *path, char *name) { //adding name to the path
     ptr = realloc(ptr,strlen(path)+strlen(name)+2);
     strcpy(ptr,path);
     strcat(ptr,"/");
