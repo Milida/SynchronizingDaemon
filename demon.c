@@ -3,7 +3,7 @@
 int main(int argc, char *argv[]) {
     unsigned int sleepTime = 300; //setting default options
     bool recursive = false;
-    int fileSize = 50;
+    int fileSize = 1024;
     int choice;
     char *source = argv[1];
     char *destination = argv[2];
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     }
 
     signal(SIGUSR1, handler);
-    while (1) {
+    while (1) { //TODO jeśli demon zostanie obudzony sygnałem w trakcie swojego działania to niech działa dalej, jeśli poza to niech wtedy się budzi
         demonCp(source, destination, recursive, fileSize);
         syslog(LOG_INFO, "Daemon goes to sleep");
         if ((sleep(sleepTime)) == 0)
