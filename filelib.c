@@ -1,17 +1,17 @@
 #include "filelib.h"
 
-void handler(int signum){
+void handler(int signum){ //signal handler
     syslog(LOG_INFO,"Waking a daemon with a signal");
 }
 
-int dirExists(const char *path) {
+int dirExists(const char *path) {//checking if directory exists
     struct stat stats;
     if(stat(path, &stats) != -1)
         return S_ISDIR(stats.st_mode);
     return 0;
 }
 
-int fileExists(const char *path) {
+int fileExists(const char *path) {//checking if regular file exists
     struct stat stats;
     stat(path, &stats);
     if(stat(path,&stats) != -1)
@@ -19,7 +19,7 @@ int fileExists(const char *path) {
     return 0;
 }
 
-mode_t read_chmod(char *source) {
+mode_t read_chmod(char *source) {//reading chmode
     struct stat mode;
     if(stat(source, &mode) != -1)
         return mode.st_mode;
@@ -29,7 +29,7 @@ mode_t read_chmod(char *source) {
     }
 }
 
-time_t read_time(char *source) {
+time_t read_time(char *source) {//reading modification timestamp
     struct stat time;
     if(stat(source,&time) != -1)
         return time.st_mtime;
@@ -39,7 +39,7 @@ time_t read_time(char *source) {
     }
 }
 
-off_t read_size(char *source) {
+off_t read_size(char *source) {//reading size
     struct stat size;
     if(stat(source, &size) != -1)
         return size.st_size;
@@ -49,28 +49,31 @@ off_t read_size(char *source) {
     }
 }
 
-void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
+void copyFile(char *sourceFile, char *destinationFile, int fileSize) {//copying file
     int source = open(sourceFile, O_RDONLY);
-    int destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);
-    if(destination < 0 && errno == EEXIST)
-        if(read_time(sourceFile) == read_time(destinationFile)) 
+    int destination;
+    if(fileExists(destinationFile)){ //file already exists
+        destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
+        if(read_time(sourceFile) == read_time(destinationFile)) //if timespamps are qual we don't have to copy
             return;
-    destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
-    if ((source < 0 || destination < 0) && errno != EEXIST) {
+    }
+    else
+        destination = open(destinationFile, O_CREAT | O_WRONLY | O_TRUNC | O_EXCL, 0644);//creating and opening file
+    if (source < 0 || destination < 0) {
         syslog(LOG_ERR,"Couldn't open the file");
         exit(EXIT_FAILURE);
     }
-    if (read_size(sourceFile) < fileSize) {
-        char buff[4096]; //małe
-        int readSource, writeDes; //małe
-        while ((readSource = read(source, buff, sizeof(buff))) > 0)
-            writeDes = write(destination, buff, (ssize_t) readSource);
+    if (read_size(sourceFile) < fileSize) {//copying small files with read/write
+        char buffer[4096];
+        int readSource, writeDes;
+        while ((readSource = read(source, buffer, sizeof(buffer))) > 0)
+            writeDes = write(destination, buffer, (ssize_t) readSource);
     }
-    else {
-        struct stat stbuf;//duże
-        if (fstat(source, &stbuf) == -1)
+    else {//copying big files with sendfile
+        struct stat statbuf;
+        if (fstat(source, &statbuf) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
-        else if (sendfile(destination, source, 0, stbuf.st_size) == -1)
+        else if (sendfile(destination, source, 0, statbuf.st_size) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
     }
     syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
@@ -79,7 +82,7 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     close(destination);
 
     mode_t source_chmod = read_chmod(sourceFile);
-    if(chmod(destinationFile, source_chmod)){
+    if(chmod(destinationFile, source_chmod)){//changing chmod
         syslog(LOG_ERR,"Couldn't change the chmod");
         exit(EXIT_FAILURE);
     }
@@ -87,13 +90,13 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {
     struct utimbuf source_time;
     source_time.modtime = read_time(sourceFile);
     source_time.actime = time(NULL);
-    if(utime(destinationFile, &source_time)){
+    if(utime(destinationFile, &source_time)){//changing modification timestamp
         syslog(LOG_ERR,"Couldn't change the modification time");
         exit(EXIT_FAILURE);
     }
 }
 
-void copyDir(char *source, char *destination, bool recursive, int fileSize) {
+void copyDir(char *source, char *destination, bool recursive, int fileSize) {//copying directory and its contents
     mode_t source_chmod = read_chmod(source);
     if (mkdir(destination, source_chmod)) {
         if (errno != EEXIST) {
@@ -101,11 +104,11 @@ void copyDir(char *source, char *destination, bool recursive, int fileSize) {
             exit(EXIT_FAILURE);
         }
     }
-    demonCp(source, destination, recursive, fileSize);
+    demonCp(source, destination, recursive, fileSize);//copying contents of directory
     struct utimbuf source_time;
     source_time.modtime = read_time(source);
     source_time.actime = time(NULL);
-    if (utime(destination, &source_time)) {
+    if (utime(destination, &source_time)) {//changing modification timestamp
         syslog(LOG_ERR, "Couldn't change the modification time");
         exit(EXIT_FAILURE);
     }

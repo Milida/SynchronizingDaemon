@@ -5,6 +5,10 @@ int main(int argc, char *argv[]) {
     bool recursive = false; //implicitly it doesn't synchronize recursively
     int fileSize = 1024; //deafult split size to divide copying method
     int choice;
+    struct sigaction sa;
+    sa.sa_handler = handler; //setting handler
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART; //setting SE_RESTART flag
     char *source = argv[1];
     char *destination = argv[2];
     openlog("Daemon synchronization", LOG_PID | LOG_NDELAY, LOG_USER);
@@ -60,14 +64,12 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
-
     pid_t pid, sid;
     pid = fork();
     if (pid < 0) {
         syslog(LOG_ERR, "Incorrect child pid");
         exit(EXIT_FAILURE);
     }
-
     if (pid > 0) {
         syslog(LOG_INFO, "Correct child pid");
         exit(EXIT_SUCCESS);
@@ -83,9 +85,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    signal(SIGUSR1, handler);
+    if(sigaction(SIGUSR1, &sa, NULL) == -1)
+        puts("Signal handling error\n");
     while (1) {
-        demonCp(source, destination, recursive, fileSize);
+        demonCp(source, destination, recursive, fileSize); //daemon synchronizing function
         syslog(LOG_INFO, "Daemon goes to sleep");
         if ((sleep(sleepTime)) == 0)
             syslog(LOG_INFO, "Daemon wakes up");
