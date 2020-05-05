@@ -31,6 +31,6 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize);
 void copyDir(char *source, char *destination, bool recursive, int fileSize);
 void demonCp(char *source, char *destination, bool recursive, int fileSize);
 void deleteFromDir(char *source, char *destination, bool recursive);
-char *catDir(char *newptr,char *first, char *second);
+char *catDir(char *ptr,char *path, char *name);
 
 #endif //filelib

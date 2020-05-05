@@ -3,7 +3,7 @@
 int main(int argc, char *argv[]) {
     unsigned int sleepTime = 300; //setting default sleep time
     bool recursive = false; //implicitly it doesn't synchronize recursively
-    int fileSize = 1024; //deafult split size to divide copying method
+    int fileSize = 1024; //default split size to divide copying method
     int choice;
     struct sigaction sa;
     sa.sa_handler = handler; //setting handler
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
                 break;
             case ':':
                 puts("Missing an operand");
-                syslog(LOG_ERR, "Missong an operand");
+                syslog(LOG_ERR, "Missing an operand");
                 exit(EXIT_FAILURE);
             default:
                 puts("No such option");
