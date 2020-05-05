@@ -54,7 +54,7 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {//copying 
     int destination;
     if(fileExists(destinationFile)){ //file already exists
         destination = open(destinationFile, O_WRONLY | O_TRUNC, 0644);
-        if(read_time(sourceFile) == read_time(destinationFile)) //if timespamps are qual we don't have to copy
+        if(read_time(sourceFile) == read_time(destinationFile)) //if timestamps are equal we don't have to copy
             return;
     }
     else
@@ -70,10 +70,10 @@ void copyFile(char *sourceFile, char *destinationFile, int fileSize) {//copying 
             writeDes = write(destination, buffer, (ssize_t) readSource);
     }
     else {//copying big files with sendfile
-        struct stat statbuf;
-        if (fstat(source, &statbuf) == -1)
+        struct stat statbuff;
+        if (fstat(source, &statbuff) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
-        else if (sendfile(destination, source, 0, statbuf.st_size) == -1)
+        else if (sendfile(destination, source, 0, statbuff.st_size) == -1)
             syslog(LOG_ERR, "Couldn't copy the file");
     }
     syslog(LOG_INFO,"File copied successfully: %s", destinationFile);
@@ -171,10 +171,10 @@ void deleteFromDir(char *source, char *destination, bool recursive) {
     free(dst);
 }
 
-char *catDir(char* newptr, char *first, char *second) {
-    newptr = realloc(newptr,strlen(first)+strlen(second)+2);
-    strcpy(newptr,first);
-    strcat(newptr,"/");
-    strcat(newptr,second);
-    return newptr;
+char *catDir(char* ptr, char *path, char *name) {
+    ptr = realloc(ptr,strlen(path)+strlen(name)+2);
+    strcpy(ptr,path);
+    strcat(ptr,"/");
+    strcat(ptr,name);
+    return ptr;
 }
