@@ -134,7 +134,7 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize) {//
         (void) closedir(sourceDir);
     } else {
         syslog(LOG_ERR, "Couldn't open the source directory");
-        perror("Couldn't open the directory");
+        exit(EXIT_FAILURE);
     }
     deleteFromDir(source, destination, recursive);//deleting unnecessary files from destination directory
     free(src);
@@ -164,7 +164,7 @@ void deleteFromDir(char *source, char *destination, bool recursive) {//deleting 
         (void) closedir(desDir);
     } else {
         syslog(LOG_ERR, "Couldn't open the destination directory %s",destination);
-        perror("Couldn't open the directory");
+        exit(EXIT_FAILURE);
     }
     free(src);
     free(dst);
