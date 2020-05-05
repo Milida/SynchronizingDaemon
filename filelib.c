@@ -123,7 +123,7 @@ void demonCp (char *source, char *destination, bool recursive, int fileSize) {//
     if (sourceDir != NULL) {
         while (dir = readdir(sourceDir)) {
             src = catDir(src, source, dir->d_name);
-            if (fileExists(src))
+            if (fileExists(src)){
                 des = catDir(des, destination,dir->d_name);
                 copyFile(src, des, fileSize);//copying regular file
             } else if (dirExists(src) && strcmp(dir->d_name, ".") && strcmp(dir->d_name, "..") && recursive) {
